@@ -1,6 +1,9 @@
-// src/index.js
-const setupServer = require('./server');
-const { initMongoConnection } = require('./db/initMongoConnection');
+import { setupServer } from './server.js';
+import { initMongoConnection } from './db/initMongoConnection';
 
-initMongoConnection();
-setupServer();
+const startServer = async () => {
+  await initMongoConnection();
+  setupServer();
+};
+
+startServer();
