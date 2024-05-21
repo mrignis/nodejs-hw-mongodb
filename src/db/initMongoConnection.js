@@ -1,22 +1,17 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+// src/db/initMongoConnection.js
+const mongoose = require('mongoose');
+const pino = require('pino')();
 
-dotenv.config();
+const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
+const uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
 
-const initMongoConnection = async () => {
-  const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
-  const mongoUri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
-
+async function initMongoConnection() {
   try {
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('Mongo connection successfully established!');
+    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    pino.info('Mongo connection successfully established!');
   } catch (error) {
-    console.error('Mongo connection error:', error);
-    process.exit(1);
+    pino.error(`MongoDB connection error: ${error}`);
   }
-};
+}
 
-export { initMongoConnection };
+module.exports = { initMongoConnection };

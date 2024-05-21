@@ -1,23 +1,14 @@
-import express from 'express';
-import cors from 'cors';
-import pino from 'pino';
-import { getContacts, getContact } from './controllers/contacts.js';
-import dotenv from 'dotenv';
+// src/server.js
+const express = require('express');
+const cors = require('cors');
+const pino = require('pino')();
+const { initMongoConnection } = require('./db/initMongoConnection');
 
-dotenv.config();
-
-const setupServer = () => {
+function setupServer() {
   const app = express();
-  const logger = pino();
 
   app.use(cors());
-  app.use((req, res, next) => {
-    logger.info(`${req.method} ${req.url}`);
-    next();
-  });
-
-  app.get('/contacts', getContacts);
-  app.get('/contacts/:contactId', getContact);
+  app.use(express.json());
 
   app.use((req, res) => {
     res.status(404).json({ message: 'Not found' });
@@ -25,8 +16,10 @@ const setupServer = () => {
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    pino.info(`Server is running on port ${PORT}`);
   });
-};
 
-export { setupServer };
+  initMongoConnection();
+}
+
+module.exports = { setupServer };
