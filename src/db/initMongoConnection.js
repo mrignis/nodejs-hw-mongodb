@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const initMongoConnection = async () => {
   const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
@@ -8,7 +10,7 @@ const initMongoConnection = async () => {
   try {
     await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
     console.log('Mongo connection successfully established!');
   } catch (error) {
@@ -17,4 +19,4 @@ const initMongoConnection = async () => {
   }
 };
 
-module.exports = { initMongoConnection };
+export { initMongoConnection };

@@ -1,4 +1,4 @@
-const Contact = require('../db/models/contact');
+import Contact from '../db/models/contact.js';
 
 const getAllContacts = async () => {
   const contacts = await Contact.find({});
@@ -10,4 +10,4 @@ const getContactById = async (contactId) => {
   return contact;
 };
 
-module.exports = { getAllContacts, getContactById };
+export { getAllContacts, getContactById };
