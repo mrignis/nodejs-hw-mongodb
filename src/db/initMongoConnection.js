@@ -1,18 +1,28 @@
 // src/db/initMongoConnection.js
-const mongoose = require('mongoose');
-const pino = require('pino')();
+import mongoose from 'mongoose';
+import pino from 'pino';
 
-const initMongoConnection = async () => {
+const logger = pino();
+
+export const initMongoConnection = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URL, {
+    // Зчитуємо змінні оточення для підключення до бази даних MongoDB
+    const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
+    
+    // Формуємо URL для підключення до бази даних
+    const url = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
+    
+    // Підключаємося до бази даних
+    await mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
     });
-    pino.info('Mongo connection successfully established!');
+
+    // Логуємо успішне підключення
+    logger.info('Mongo connection successfully established!');
   } catch (error) {
-    pino.error('Error connecting to MongoDB:', error.message);
+    // Логуємо помилку підключення
+    logger.error('Error connecting to MongoDB:', error.message);
   }
 };
-
-module.exports = { initMongoConnection };
