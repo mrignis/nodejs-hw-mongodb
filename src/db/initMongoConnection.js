@@ -15,4 +15,4 @@ const initMongoConnection = async () => {
   }
 };
 
-module.exports = initMongoConnection;
+module.exports = { initMongoConnection };
