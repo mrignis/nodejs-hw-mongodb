@@ -6,21 +6,20 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.2.0",
+    "eslint": "^9.3.0",
+    "globals": "^15.1.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongoose": "^8.4.0",
+    "pino-http": "^5.8.0",
+    "dotenv": "^16.0.0"
   }
-,
-"keywords": [],
-"author": "",
-"license": "ISC",
-"devDependencies": {
-  "@eslint/js": "^9.2.0",
-  "eslint": "^9.3.0",
-  "globals": "^15.1.0"
-},
-"dependencies": {
-  "cors": "^2.8.5",
-  "express": "^4.17.1",
-  "mongoose": "^8.4.0",
-  "pino-http": "^5.8.0",
-  "dotenv": "^16.0.0"
-}
 }
