@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const pino = require('pino')();
-const { initMongoConnection } = require('./db/initMongoConnection').default;
+const { initMongoConnection } = require('./db/initMongoConnection');
 
 function setupServer() {
   const app = express();
