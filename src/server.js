@@ -1,15 +1,16 @@
 // src/server.js
 const express = require('express');
-const cors = require('cors');
 const pino = require('pino')();
-const { initMongoConnection } = require('./db/initMongoConnection');
+const cors = require('cors');
 
-function setupServer() {
+const setupServer = () => {
   const app = express();
 
+  // Middleware
   app.use(cors());
   app.use(express.json());
 
+  // 404 Not Found middleware
   app.use((req, res) => {
     res.status(404).json({ message: 'Not found' });
   });
@@ -18,8 +19,6 @@ function setupServer() {
   app.listen(PORT, () => {
     pino.info(`Server is running on port ${PORT}`);
   });
+};
 
-  initMongoConnection();
-}
-
-module.exports = { setupServer };
+module.exports = setupServer;

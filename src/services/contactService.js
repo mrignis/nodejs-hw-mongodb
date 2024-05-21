@@ -1,13 +1,17 @@
 // src/services/contactService.js
-const Contact = require('../db/models/contact');
+const Contact = require('../db/contactModel');
 
-async function getAllContacts() {
-  try {
-    const contacts = await Contact.find();
-    return { status: 'success', message: 'Successfully found contacts!', data: contacts };
-  } catch (error) {
-    return { status: 'error', message: 'Failed to fetch contacts', error: error.message };
-  }
-}
+const getAllContacts = async () => {
+  const contacts = await Contact.find();
+  return contacts;
+};
 
-module.exports = { getAllContacts };
+const getContactById = async (contactId) => {
+  const contact = await Contact.findById(contactId);
+  return contact;
+};
+
+module.exports = {
+  getAllContacts,
+  getContactById,
+};

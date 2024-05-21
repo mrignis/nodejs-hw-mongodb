@@ -2,16 +2,17 @@
 const mongoose = require('mongoose');
 const pino = require('pino')();
 
-const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
-const uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
-
-async function initMongoConnection() {
+const initMongoConnection = async () => {
   try {
-    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect(process.env.MONGODB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    });
     pino.info('Mongo connection successfully established!');
   } catch (error) {
-    pino.error(`MongoDB connection error: ${error}`);
+    pino.error('Error connecting to MongoDB:', error.message);
   }
-}
+};
 
-module.exports = { initMongoConnection };
+module.exports = initMongoConnection;
