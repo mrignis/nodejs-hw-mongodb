@@ -1,28 +1,19 @@
-// src/db/initMongoConnection.js
 import mongoose from 'mongoose';
-import pino from 'pino';
+import dotenv from 'dotenv';
 
-const logger = pino();
+dotenv.config();
 
 export const initMongoConnection = async () => {
   try {
-    // Зчитуємо змінні оточення для підключення до бази даних MongoDB
     const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
-    
-    // Формуємо URL для підключення до бази даних
-    const url = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
-    
-    // Підключаємося до бази даних
-    await mongoose.connect(url, {
+    const mongoURI = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
+    await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true,
     });
-
-    // Логуємо успішне підключення
-    logger.info('Mongo connection successfully established!');
+    console.log('Mongo connection successfully established!');
   } catch (error) {
-    // Логуємо помилку підключення
-    logger.error('Error connecting to MongoDB:', error.message);
+    console.error('Mongo connection error:', error);
+    throw error;
   }
 };
