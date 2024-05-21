@@ -7,7 +7,7 @@ const contactSchema = new mongoose.Schema({
   isFavourite: { type: Boolean, default: false },
   contactType: {
     type: String,
-    enum: ['work', 'home', 'personal'],
+   
     default: 'personal',
     required: true
   }
