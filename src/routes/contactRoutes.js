@@ -1,12 +1,39 @@
-// src/services/contactService.js
-import Contact from '../db/contactModel.js';
+// src/routes/contactRoutes.js
+import express from 'express';
+const router = express.Router();
+import * as contactService from '../services/contactService.js';
 
-export const getAllContacts = async () => {
-  const contacts = await Contact.find();
-  return contacts;
-};
+// GET /contacts
+router.get('/contacts', async (req, res) => {
+  try {
+    const contacts = await contactService.getAllContacts();
+    res.status(200).json({
+      status: 'success',
+      message: 'Successfully found contacts!',
+      data: contacts,
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
 
-export const getContactById = async (contactId) => {
-  const contact = await Contact.findById(contactId);
-  return contact;
-};
+// GET /contacts/:contactId
+router.get('/contacts/:contactId', async (req, res) => {
+  const contactId = req.params.contactId;
+  try {
+    const contact = await contactService.getContactById(contactId);
+    if (!contact) {
+      res.status(404).json({ status: 'error', message: 'Contact not found' });
+      return;
+    }
+    res.status(200).json({
+      status: 'success',
+      message: `Successfully found contact with id ${contactId}!`,
+      data: contact,
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+export default router;
