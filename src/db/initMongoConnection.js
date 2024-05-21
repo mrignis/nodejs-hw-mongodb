@@ -1,5 +1,5 @@
 // src/db/initMongoConnection.js
-const mongoose = require('mongoose');
+import { connect } from 'mongoose';
 const pino = require('pino')();
 
 const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
@@ -7,11 +7,11 @@ const uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${
 
 async function initMongoConnection() {
   try {
-    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    await connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     pino.info('Mongo connection successfully established!');
   } catch (error) {
     pino.error(`MongoDB connection error: ${error}`);
   }
 }
 
-module.exports = initMongoConnection;
+export default initMongoConnection;
