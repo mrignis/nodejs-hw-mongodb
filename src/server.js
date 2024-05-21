@@ -1,12 +1,19 @@
-// src/server.js
-import express from 'express';
-import cors from 'cors';
-import pino from 'pino-http';
+const express = require('express');
+const cors = require('cors');
+const pino = require('pino')();
+const { getContacts, getContact } = require('./controllers/contacts');
+require('dotenv').config();
 
-export const setupServer = () => {
+const setupServer = () => {
   const app = express();
   app.use(cors());
-  app.use(pino());
+  app.use((req, res, next) => {
+    pino.info(`${req.method} ${req.url}`);
+    next();
+  });
+
+  app.get('/contacts', getContacts);
+  app.get('/contacts/:contactId', getContact);
 
   app.use((req, res) => {
     res.status(404).json({ message: 'Not found' });
@@ -16,6 +23,6 @@ export const setupServer = () => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
-
-  return app;
 };
+
+module.exports = { setupServer };
