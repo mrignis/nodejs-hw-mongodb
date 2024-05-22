@@ -4,7 +4,6 @@ import pino from 'pino-http';
 import cors from 'cors';
 
 const PORT = process.env.PORT || 3000;
-
 export const setupServer = () => {
   const app = express();
 
