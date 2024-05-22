@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import Contact from './contact.js';
+import Contact from '../db/contactModel.js';
 import { initMongoConnection } from './initMongoConnection.js';
 
 const __filename = fileURLToPath(import.meta.url);
