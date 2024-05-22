@@ -2,16 +2,16 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import Contact from './contactModel.js';
-import connectDB from './initMongoConnection.js';
+import Contact from './contact.js';
+import { initMongoConnection } from './initMongoConnection.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const importContacts = async () => {
-  await connectDB();
+  await initMongoConnection();
 
-  const contactsFilePath = path.join(__dirname, 'contacts.json');
+  const contactsFilePath = path.join(__dirname, '../contacts.json'); // Оновлений шлях до файлу contacts.json
   const contactsData = JSON.parse(fs.readFileSync(contactsFilePath, 'utf-8'));
 
   try {
