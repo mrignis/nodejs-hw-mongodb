@@ -1,24 +1,49 @@
-// src/server.js
+/* eslint-disable no-unused-vars */
 import express from 'express';
-import contactRouter from './routes/contact.js';  // Доданий .js
+import pino from 'pino-http';
+import cors from 'cors';
 
-const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json());
+export const setupServer = () => {
+  const app = express();
 
-// Routes
-app.use('/contacts', contactRouter);
+  app.use(express.json());
+  app.use(cors());
 
-app.use((req, res) => {
-  res.status(404).json({ message: 'Not found' });
-});
+  app.use(
+    pino({
+      transport: {
+        target: 'pino-pretty',
+      },
+    }),
+  );
 
-const setupServer = () => {
-  const PORT = process.env.PORT || 3000;
+  // Обробка маршруту /contacts
+  app.get('/contacts', (_req, res) => {
+    // Приклад: отримання всіх контактів
+    const contacts = []; 
+    res.json({
+      status: 'success',
+      message: 'Successfully found contacts!',
+      data: contacts,
+    });
+  });
+
+  app.use('*', function (req, res, next) {
+      res.status(404).json({
+        message: 'Not found',
+      });
+    });
+
+  app.use((err, req, res, ) => {
+    res.status(500).json({
+      message: 'Something went wrong',
+      error: err.message,
+    });
+  });
+
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
 };
-
-export default setupServer;
