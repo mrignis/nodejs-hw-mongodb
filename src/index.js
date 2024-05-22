@@ -1,9 +1,16 @@
-import { setupServer } from './server.js';
-import { initMongoConnection } from './db/initMongoConnection.js';
+// src/index.js
+import 'dotenv/config';
+import setupServer from './server.js';
+import initMongoConnection from './db/initMongoConnection.js';
+
 
 const startServer = async () => {
-  await initMongoConnection();
-  setupServer();
+  try {
+    await initMongoConnection();
+    setupServer();
+  } catch (error) {
+    console.error('Failed to start the server:', error);
+  }
 };
 
 startServer();
