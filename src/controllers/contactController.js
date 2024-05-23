@@ -1,17 +1,40 @@
-// src/controllers/contacts.js
+import mongoose from 'mongoose';
+import { getAllContactsService, getContactByIdService } from '../services/contact.js';
 
-import {  getContact } from '../services/contacts.js';
+export const getAllContacts = async (req, res) => {
+  try {
+    const contacts = await getAllContactsService();
+    res.status(200).json({
+      status: 'success',
+      message: 'Successfully found contacts!',
+      data: contacts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
+  }
+};
 
 export const getContactById = async (req, res) => {
-  const contactId = req.params.contactId;
+  const { contactId } = req.params;
+
+  // Перевірка на дійсний ObjectId
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Invalid contact ID format',
+    });
+  }
+
   try {
-    const contact = await getContact(contactId);
+    const contact = await getContactByIdService(contactId);
     if (!contact) {
-      res.status(404).json({
+      return res.status(404).json({
         status: 'error',
         message: `Contact with id ${contactId} not found`,
       });
-      return;
     }
     res.status(200).json({
       status: 'success',
@@ -19,7 +42,6 @@ export const getContactById = async (req, res) => {
       data: contact,
     });
   } catch (error) {
-    console.error(`Error while getting contact with id ${contactId}`, error);
     res.status(500).json({
       status: 'error',
       message: `Failed to retrieve contact with id ${contactId}`,
