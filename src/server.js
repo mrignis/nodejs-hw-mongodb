@@ -1,7 +1,11 @@
-
+// src/server.js
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import { getAllContacts, getContactById } from './services/contact.js';
+
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
@@ -19,27 +23,48 @@ export const setupServer = () => {
     }),
   );
 
-  // Обробка маршруту /contacts
-  app.get('/contacts', (_req, res) => {
-    // Приклад: отримання всіх контактів
-    const contacts = []; 
-    res.json({
-      status: 'success',
-      message: 'Successfully found contacts!',
-      data: contacts,
-    });
+  app.get('/contacts', async (req, res) => {
+    try {
+      const contacts = await getAllContacts();
+      res.status(200).json({
+        status: 'success',
+        message: 'Successfully found contacts!',
+        data: contacts,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
   });
 
-  app.use('*', function (req, res, ) {
-      res.status(404).json({
-        message: 'Not found',
+  app.get('/contacts/:contactId', async (req, res) => {
+    try {
+      const { contactId } = req.params;
+      const contact = await getContactById(contactId);
+      if (!contact) {
+        return res.status(404).json({
+          status: 'error',
+          message: `Contact with id ${contactId} not found`,
+        });
+      }
+      res.status(200).json({
+        status: 'success',
+        message: `Successfully found contact with id ${contactId}!`,
+        data: contact,
       });
-    });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
+  });
 
-  app.use((err, req, res, ) => {
-    res.status(500).json({
-      message: 'Something went wrong',
-      error: err.message,
+  app.use('*', (req, res) => {
+    res.status(404).json({
+      message: 'Not found',
     });
   });
 
@@ -47,4 +72,3 @@ export const setupServer = () => {
     console.log(`Server is running on port ${PORT}`);
   });
 };
-export default setupServer;
