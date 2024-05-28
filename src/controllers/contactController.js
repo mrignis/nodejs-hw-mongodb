@@ -1,6 +1,13 @@
-import mongoose from 'mongoose';
+// src/controllers/contacts.js
+
 import createError from 'http-errors';
-import { getAllContactsService, getContactByIdService, createContactService, updateContactService, deleteContactService } from '../services/contact.js';
+import {
+  getAllContactsService,
+  getContactByIdService,
+  createContactService,
+  updateContactService,
+  deleteContactService,
+} from '../services/contacts.js';
 
 export const getContacts = async (req, res, next) => {
   try {
@@ -17,10 +24,6 @@ export const getContacts = async (req, res, next) => {
 
 export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
-    return next(createError(400, 'Invalid contact ID format'));
-  }
 
   try {
     const contact = await getContactByIdService(contactId);
@@ -53,10 +56,6 @@ export const createContact = async (req, res, next) => {
 export const updateContact = async (req, res, next) => {
   const { contactId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
-    return next(createError(400, 'Invalid contact ID format'));
-  }
-
   try {
     const updatedContact = await updateContactService(contactId, req.body);
     if (!updatedContact) {
@@ -71,12 +70,9 @@ export const updateContact = async (req, res, next) => {
     next(error);
   }
 };
+
 export const deleteContact = async (req, res, next) => {
   const { contactId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
-    return next(createError(400, 'Invalid contact ID format'));
-  }
 
   try {
     const deletedContact = await deleteContactService(contactId);
