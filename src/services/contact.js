@@ -11,7 +11,14 @@ export const getContactByIdService = async (contactId) => {
 };
 
 export const createContactService = async (contactData) => {
-  const newContact = new Contact(contactData);
+  const { name, phoneNumber, email, isFavourite, contactType } = contactData;
+  const newContact = new Contact({
+    name,
+    phoneNumber,
+    email,
+    isFavourite,
+    contactType,
+  });
   await newContact.save();
   return newContact;
 };
@@ -21,7 +28,7 @@ export const updateContactService = async (contactId, updates) => {
   return updatedContact;
 };
 
-export const deleteContactService = async (contactId) => {
-  const deletedContact = await Contact.findByIdAndDelete(contactId);
+export const deleteContactService = async (id) => {
+  const deletedContact = await Contact.findByIdAndDelete(id);
   return deletedContact;
 };
