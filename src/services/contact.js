@@ -2,6 +2,7 @@
 
 import Contact from '../db/contactModel.js';
 
+
 export const getAllContactsService = async () => {
   const contacts = await Contact.find();
   return contacts;
@@ -12,8 +13,8 @@ export const getContactByIdService = async (contactId) => {
   return contact;
 };
 
-export const createContactService = async (contactData) => {
-  const { name, phoneNumber, email, isFavourite, contactType } = contactData;
+export const createContactService = async (payload) => {
+  const { name, phoneNumber, email, isFavourite, contactType } = payload;
   const newContact = new Contact({
     name,
     phoneNumber,
