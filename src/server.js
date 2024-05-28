@@ -3,6 +3,9 @@ import pino from 'pino-http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import contactsRouter from './routes/contact.js';
+import errorHandler from './middlewares/errorHandler.js';
+import notFoundHandler from './middlewares/notFoundHandler.js';
 import { getAllContactsService, getContactByIdService } from './services/contact.js';
 
 dotenv.config();
@@ -23,6 +26,10 @@ export const setupServer = () => {
     }),
   );
 
+  // Реєстрація роутера для контактів
+  app.use('/contacts', contactsRouter);
+
+  // Обробка маршруту для отримання всіх контактів
   app.get('/contacts', async (req, res) => {
     try {
       const contacts = await getAllContactsService();
@@ -39,6 +46,7 @@ export const setupServer = () => {
     }
   });
 
+  // Обробка маршруту для отримання контакту за ID
   app.get('/contacts/:contactId', async (req, res) => {
     const { contactId } = req.params;
 
@@ -72,13 +80,13 @@ export const setupServer = () => {
     }
   });
 
-  app.use('*', (req, res) => {
-    res.status(404).json({
-      status: 404,
-      message: 'Not found',
-    });
-  });
+  // Обробка неіснуючих маршрутів
+  app.use('*', notFoundHandler);
 
+  // Загальний обробник помилок
+  app.use(errorHandler);
+
+  // Запуск сервера
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

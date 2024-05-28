@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { getAllContactsService, getContactByIdService } from '../services/contact.js';
 
-export const getAllContacts = async (req, res) => {
+export const getContacts = async (req, res, next) => {
   try {
     const contacts = await getAllContactsService();
     res.status(200).json({
@@ -10,14 +10,11 @@ export const getAllContacts = async (req, res) => {
       data: contacts,
     });
   } catch (error) {
-    res.status(404).json({
-      status: 404,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-export const getContactById = async (req, res) => {
+export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
 
   // Перевірка на дійсний ObjectId
@@ -25,6 +22,7 @@ export const getContactById = async (req, res) => {
     return res.status(400).json({
       status: 400,
       message: 'Invalid contact ID format',
+      data: null,
     });
   }
 
@@ -34,6 +32,7 @@ export const getContactById = async (req, res) => {
       return res.status(404).json({
         status: 404,
         message: `Contact with id ${contactId} not found`,
+        data: null,
       });
     }
     res.status(200).json({
@@ -42,10 +41,6 @@ export const getContactById = async (req, res) => {
       data: contact,
     });
   } catch (error) {
-    res.status(500).json({
-      status: 500,
-      message: `Failed to retrieve contact with id ${contactId}`,
-      error: error.message,
-    });
+    next(error);
   }
 };
