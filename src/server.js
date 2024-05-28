@@ -3,6 +3,7 @@ import pino from 'pino-http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import {env} from './db/env.js';
 import contactsRouter from './routes/contact.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
@@ -10,13 +11,16 @@ import { getAllContactsService, getContactByIdService } from './services/contact
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
-
+const PORT = Number(env('PORT', '3000'));
 export const setupServer = () => {
   const app = express();
 
-  app.use(express.json());
-  app.use(cors());
+  app.use(
+    express.json({
+      type: ['application/json', 'application/vnd.api+json'],
+      limit: '100kb',
+    }),
+  );
 
   app.use(
     pino({

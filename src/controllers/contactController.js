@@ -23,7 +23,7 @@ export const getContacts = async (req, res, next) => {
 export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
 
-  try {
+ 
     const contact = await getContactByIdService(contactId);
     if (!contact) {
       return next(createError(404, 'Contact not found', { message: 'Contact not found' }));
@@ -32,11 +32,8 @@ export const getContactById = async (req, res, next) => {
       status: 200,
       message: `Successfully found contact with id ${contactId}!`,
       data: contact,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+    });};
+
 
 export const createContact = async (req, res, next) => {
   try {

@@ -8,12 +8,12 @@ import {
   updateContact,
   deleteContact,
 } from '../controllers/contactController.js';
-
+import { ctrlWrapper } from '../middlewares/ctrlWrapper.js';
 const router = express.Router();
-
-router.get('/contacts', getContacts);
+router.get('/contacts', ctrlWrapper(getContacts));
 router.get('/contacts/:contactId', getContactById);
 router.post('/contacts', createContact);
+
 router.patch('/contacts/:contactId', updateContact);
 router.delete('/contacts/:contactId', deleteContact);
 
