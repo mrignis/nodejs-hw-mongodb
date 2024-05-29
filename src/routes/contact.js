@@ -9,6 +9,7 @@ import {
   deleteContact,
 } from '../controllers/contactController.js';
 import { ctrlWrapper } from '../middlewares/ctrlWrapper.js';
+
 const router = express.Router();
 router.get('/contacts', ctrlWrapper(getContacts));
 router.get('/contacts/:contactId', getContactById);
