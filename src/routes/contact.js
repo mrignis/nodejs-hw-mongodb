@@ -13,7 +13,6 @@ const router = express.Router();
 router.get('/contacts', ctrlWrapper(getContacts));
 router.get('/contacts/:contactId', getContactById);
 router.post('/students', ctrlWrapper(createContact));
-
 router.patch('/contacts/:contactId',ctrlWrapper(updateContact));
 router.delete('/contacts/:contactId',ctrlWrapper (deleteContact));
 

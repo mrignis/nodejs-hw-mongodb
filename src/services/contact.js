@@ -25,11 +25,25 @@ export const createContactService = async (payload) => {
   await newContact.save();
   return newContact;
 };
+export const updateContactService = async (contactId, payload, options = {}) => {
+  const rawResult = await Contact.findOneAndUpdate(
+    { _id: contactId },
+    payload,
+    {
+      new: true,
+      includeResultMetadata: true,
+      ...options,
+    },
+  );
 
-export const updateContactService = async (contactId, updates) => {
-  const updatedContact = await Contact.findByIdAndUpdate(contactId, updates, { new: true });
-  return updatedContact;
+  if (!rawResult || !rawResult.value) return null;
+
+  return {
+    contact: rawResult.value,
+    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+  };
 };
+
 
 export const deleteContactService = async (id) => {
   const deletedContact = await Contact.findByIdAndDelete(id);
