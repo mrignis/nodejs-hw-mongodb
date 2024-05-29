@@ -23,7 +23,7 @@ export const getContacts = async (req, res, next) => {
 export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
 
- 
+  try {
     const contact = await getContactByIdService(contactId);
     if (!contact) {
       return next(createError(404, 'Contact not found', { message: 'Contact not found' }));
@@ -32,16 +32,29 @@ export const getContactById = async (req, res, next) => {
       status: 200,
       message: `Successfully found contact with id ${contactId}!`,
       data: contact,
-    });};
-
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const createContact = async (req, res, next) => {
   try {
+    const { name, phoneNumber } = req.body;
+
+    // Перевірка обов'язкових полів
+    if (!name || !phoneNumber) {
+      return next(createError(400, 'Name and phoneNumber are required fields.'));
+    }
+
+    // Створення нового контакту
     const newContact = await createContactService(req.body);
+
+    // Повернення відповіді з кодом статусу 201 та об'єктом даних нового контакту
     res.status(201).json({
       status: 201,
       message: 'Successfully created a contact!',
-      data: newContact,
+      data: newContact
     });
   } catch (error) {
     next(error);
@@ -79,3 +92,6 @@ export const deleteContact = async (req, res, next) => {
     next(error);
   }
 };
+
+// Функція для перевірки правильності формату електронної пошти
+
