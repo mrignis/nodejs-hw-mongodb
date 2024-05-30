@@ -5,20 +5,21 @@ import {
   createContactService,
   updateContactService,
   deleteContactService,
-  
 } from '../services/contact.js';
 
-
 export const getContacts = async (req, res, next) => {
-  try {  
+  try {
     const contacts = await getAllContactsService({}, '-__v');
-  
-    delete contacts.__v;
+    const cleanedContacts = contacts.map(contact => {
+      const contactObj = contact.toObject();
+      delete contactObj.__v;
+      return contactObj;
+    });
+
     res.status(200).json({
-    
       status: 200,
       message: 'Successfully found contacts!',
-      data: contacts,
+      data: cleanedContacts,
     });
   } catch (error) {
     next(error);
@@ -29,8 +30,7 @@ export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    
-    const contact = await getContactByIdService(contactId ,);
+    const contact = await getContactByIdService(contactId, '-__v');
     if (!contact) {
       const payload = {
         status: 404,
@@ -39,10 +39,13 @@ export const getContactById = async (req, res, next) => {
       };
       return next(createError(payload));
     }
+    const contactObj = contact.toObject();
+    delete contactObj.__v;
+
     res.status(200).json({
       status: 200,
       message: `Successfully found contact with id ${contactId}!`,
-      data: contact,
+      data: contactObj,
     });
   } catch (error) {
     next(error);
@@ -51,11 +54,10 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const newContact = await createContactService(req.body);
- 
-    await newContact.save();
-    // Видалення поля "__v" перед створенням відповіді
+    let newContact = await createContactService(req.body);
+    newContact = newContact.toObject();
     delete newContact.__v;
+
     const payload = {
       status: 201,
       message: 'Successfully created a contact!',
@@ -70,40 +72,59 @@ export const createContact = async (req, res, next) => {
 export const upsertContactController = async (req, res, next) => {
   const { contactId } = req.params;
 
-  const result = await updateContactService( contactId, req.body, {
-    upsert: true,
-  });
+  try {
+    const result = await updateContactService(contactId, req.body, {
+      upsert: true,
+      new: true,
+      select: '-__v'
+    });
 
-  if (!result) {
-    next(createError(404, 'Contact not found'));
-    return;
+    if (!result) {
+      next(createError(404, 'Contact not found'));
+      return;
+    }
+
+    const status = result.isNew ? 201 : 200;
+    const contactObj = result.toObject();
+    delete contactObj.__v;
+
+    res.status(status).json({
+      status,
+      message: `Successfully upserted a contact!`,
+      data: contactObj,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const status = result.isNew ? 201 : 200;
-
-  res.status(status).json({
-    status,
-    message: `Successfully upserted a contact!`,
-    data: result.contact,
-  });
 };
-
 
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
-  const result = await updateContactService(contactId, req.body);
 
-  if (!result) {
-    next(createError(404, 'Contact not found'));
-    return;
+  try {
+    const result = await updateContactService(contactId, req.body, {
+      new: true,
+      select: '-__v'
+    });
+
+    if (!result) {
+      next(createError(404, 'Contact not found'));
+      return;
+    }
+
+    const contactObj = result.toObject();
+    delete contactObj.__v;
+
+    res.json({
+      status: 200,
+      message: `Successfully patched a contact!`,
+      data: contactObj,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  res.json({
-    status: 200,
-    message: `Successfully patched a contact!`,
-    data: result.student,
-  });
 };
+
 export const deleteContact = async (req, res, next) => {
   const { contactId } = req.params;
 

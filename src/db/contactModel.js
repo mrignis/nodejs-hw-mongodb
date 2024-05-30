@@ -10,8 +10,9 @@ const contactSchema = new mongoose.Schema({
     type: String,
     enum: ['work', 'home', 'personal'],
     default: 'personal',
+   
   },
-}, { timestamps: true },{ versionKey: false });
+}, {versionKey: false , timestamps: true});
 
 const Contact = mongoose.model('Contact', contactSchema);
 
