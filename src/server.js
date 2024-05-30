@@ -3,7 +3,7 @@ import pino from 'pino-http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { env } from './db/env.js';
-import contactsRouter from './routes/contact.js';
+import router from './routes/contact.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
 
@@ -31,10 +31,8 @@ app.use(
   }),
 );
 
-// Підключення роутера для контактів
-app.use('/api', contactsRouter);
+app.use(router);
 
-// Обробка неіснуючих маршрутів
 app.use('*', notFoundHandler);
 
 // Загальний обробник помилок
