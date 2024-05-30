@@ -5,6 +5,7 @@ import {
   createContactService,
   updateContactService,
   deleteContactService,
+  
 } from '../services/contact.js';
 
 
@@ -87,22 +88,22 @@ export const upsertContactController = async (req, res, next) => {
   });
 };
 
-export const updateContactPartial = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    if (!contactId.match(/^[0-9a-fA-F]{24}$/)) {
-      throw createError(400, 'Invalid ID format');
-    }
-    const updatedContact = await updateContactService.findByIdAndUpdate(contactId, req.body, { new: true });
-    if (!updatedContact) {
-      throw createError(404, 'Contact not found');
-    }
-    res.json({ status: 'success', message: 'Successfully patched a contact!', data: updatedContact });
-  } catch (error) {
-    next(error);
-  }
-};
 
+export const patchContactController = async (req, res, next) => {
+  const { contactId } = req.params;
+  const result = await updateContactService(contactId, req.body);
+
+  if (!result) {
+    next(createError(404, 'Contact not found'));
+    return;
+  }
+
+  res.json({
+    status: 200,
+    message: `Successfully patched a contact!`,
+    data: result.student,
+  });
+};
 export const deleteContact = async (req, res, next) => {
   const { contactId } = req.params;
 
