@@ -1,7 +1,7 @@
 // src/services/contacts.js
 
 import Contact from '../db/contactModel.js';
-
+import createError from 'http-errors';
 
 export const getAllContactsService = async () => {
   const contacts = await Contact.find();
@@ -30,22 +30,20 @@ export const createContactService = async (payload) => {
 
 
 
-export const updateContactService = async (contactId, payload, options = {}) => {
-  const rawResult = await Contact.findOneAndUpdate(
-    { _id: contactId },
-    payload,
-    {
-      new: true,
-      includeResultMetadata: true,
-      ...options,
-    },
-  );
+export const upsertContactService = async (id, payload, options = {}) => {
+  const rawResult = await Contact.findByIdAndUpdate(id, payload, {
+    new: true,
+    includeResultMetadata: true,
+    ...options,
+  });
 
-  if (!rawResult || !rawResult.value) return null;
+  if (!rawResult || !rawResult.value) {
+    throw createError(404, 'Contact not found');
+  }
 
   return {
     contact: rawResult.value,
-    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+    isNew: !rawResult?.lastErrorObject?.updatedExisting,
   };
 };
 

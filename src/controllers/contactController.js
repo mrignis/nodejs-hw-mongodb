@@ -3,52 +3,57 @@ import {
   getAllContactsService,
   getContactByIdService,
   createContactService,
-  updateContactService,
+  upsertContactService,
   deleteContactService,
 } from '../services/contact.js';
+import mongoose from 'mongoose';
 
-export const getContacts = async (req, res, next) => {
+export const getAllContacts = async (req, res) => {
   try {
-    const contacts = await getAllContactsService({}, '-__v');
-    const cleanedContacts = contacts.map(contact => {
-      const contactObj = contact.toObject();
-      delete contactObj.__v;
-      return contactObj;
-    });
-
+    const contacts = await getAllContactsService();
     res.status(200).json({
       status: 200,
       message: 'Successfully found contacts!',
-      data: cleanedContacts,
+      data: contacts,
     });
   } catch (error) {
-    next(error);
+    res.status(404).json({
+      status: 404,
+      message: error.message,
+    });
   }
 };
 
-export const getContactById = async (req, res, next) => {
+export const getContactById = async (req, res) => {
   const { contactId } = req.params;
 
-  try {
-    const contact = await getContactByIdService(contactId, '-__v');
-    if (!contact) {
-      const payload = {
-        status: 404,
-        message: 'Contact not found',
-        data: { message: 'Contact not found' }
-      };
-      return next(createError(payload));
-    }
-    const contactObj = contact.toObject();
-    delete contactObj.__v;
+  // Перевірка на дійсний ObjectId
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+    return res.status(400).json({
+      status: 400,
+      message: 'Invalid contact ID format',
+    });
+  }
 
+  try {
+    const contact = await getContactByIdService(contactId);
+    if (!contact) {
+      return res.status(404).json({
+        status: 404,
+        message: `Contact with id ${contactId} not found`,
+      });
+    }
     res.status(200).json({
       status: 200,
       message: `Successfully found contact with id ${contactId}!`,
-      data: contactObj,
+      data: contact,
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({
+      status: 500,
+      message: `Failed to retrieve contact with id ${contactId}`,
+      error: error.message,
+    });
   }
 };
 
@@ -69,60 +74,32 @@ export const createContact = async (req, res, next) => {
   }
 };
 
-export const upsertContactController = async (req, res, next) => {
+export const updateContactController = async (req, res, ) => {
+  const { body } = req;
   const { contactId } = req.params;
+  const { isNew, contact } = await upsertContactService(contactId, body, {
+    upsert: true,
+  });
 
-  try {
-    const result = await updateContactService(contactId, req.body, {
-      upsert: true,
-      new: true,
-      select: '-__v'
-    });
+  const status = isNew ? 201 : 200;
 
-    if (!result) {
-      next(createError(404, 'Contact not found'));
-      return;
-    }
-
-    const status = result.isNew ? 201 : 200;
-    const contactObj = result.toObject();
-    delete contactObj.__v;
-
-    res.status(status).json({
-      status,
-      message: `Successfully upserted a contact!`,
-      data: contactObj,
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(status).json({
+    status,
+    message: `Successfully upserted contact!`,
+    data: contact,
+  });
 };
 
-export const patchContactController = async (req, res, next) => {
+export const patchContactController = async (req, res) => {
+  const { body } = req;
   const { contactId } = req.params;
+  const { contact } = await upsertContactService(contactId, body);
 
-  try {
-    const result = await updateContactService(contactId, req.body, {
-      new: true,
-      select: '-__v'
-    });
-
-    if (!result) {
-      next(createError(404, 'Contact not found'));
-      return;
-    }
-
-    const contactObj = result.toObject();
-    delete contactObj.__v;
-
-    res.json({
-      status: 200,
-      message: `Successfully patched a contact!`,
-      data: contactObj,
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(200).json({
+    status: 200,
+    message: `Successfully patched contact!`,
+    data: contact,
+  });
 };
 
 export const deleteContact = async (req, res, next) => {
