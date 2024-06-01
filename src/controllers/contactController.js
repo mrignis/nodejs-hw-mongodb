@@ -1,4 +1,5 @@
-import createError from 'http-errors';
+
+import mongoose from 'mongoose';
 import {
   getAllContactsService,
   getContactByIdService,
@@ -6,7 +7,8 @@ import {
   upsertContactService,
   deleteContactService,
 } from '../services/contact.js';
-import mongoose from 'mongoose';
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
 export const getAllContacts = async (req, res) => {
   try {
@@ -17,9 +19,10 @@ export const getAllContacts = async (req, res) => {
       data: contacts,
     });
   } catch (error) {
-    res.status(404).json({
-      status: 404,
-      message: error.message,
+    res.status(500).json({
+      status: 500,
+      message: 'Something went wrong',
+      error: error.message,
     });
   }
 };
@@ -27,8 +30,7 @@ export const getAllContacts = async (req, res) => {
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
 
-  // Перевірка на дійсний ObjectId
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+  if (!isValidObjectId(contactId)) {
     return res.status(400).json({
       status: 400,
       message: 'Invalid contact ID format',
@@ -74,46 +76,75 @@ export const createContact = async (req, res, next) => {
   }
 };
 
-export const updateContactController = async (req, res, ) => {
+export const updateContactController = async (req, res, next) => {
   const { body } = req;
   const { contactId } = req.params;
-  const { isNew, contact } = await upsertContactService(contactId, body, {
-    upsert: true,
-  });
 
-  const status = isNew ? 201 : 200;
+  if (!isValidObjectId(contactId)) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Invalid contact ID format',
+    });
+  }
 
-  res.status(status).json({
-    status,
-    message: `Successfully upserted contact!`,
-    data: contact,
-  });
+  try {
+    const { isNew, contact } = await upsertContactService(contactId, body, {
+      upsert: true,
+    });
+
+    const status = isNew ? 201 : 200;
+
+    res.status(status).json({
+      status,
+      message: `Successfully upserted contact!`,
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const patchContactController = async (req, res) => {
+export const patchContactController = async (req, res, next) => {
   const { body } = req;
   const { contactId } = req.params;
-  const { contact } = await upsertContactService(contactId, body);
 
-  res.status(200).json({
-    status: 200,
-    message: `Successfully patched contact!`,
-    data: contact,
-  });
+  if (!isValidObjectId(contactId)) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Invalid contact ID format',
+    });
+  }
+
+  try {
+    const { contact } = await upsertContactService(contactId, body);
+
+    res.status(200).json({
+      status: 200,
+      message: `Successfully patched contact!`,
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const deleteContact = async (req, res, next) => {
   const { contactId } = req.params;
 
+  if (!isValidObjectId(contactId)) {
+    return res.status(400).json({
+      status: 400,
+      message: 'Invalid contact ID format',
+    });
+  }
+
   try {
     const deletedContact = await deleteContactService(contactId);
     if (!deletedContact) {
-      const payload = {
+      return res.status(404).json({
         status: 404,
         message: 'Contact not found',
-        data: { message: 'Contact not found' }
-      };
-      return next(createError(payload));
+      });
     }
     res.status(204).send();
   } catch (error) {
