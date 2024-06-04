@@ -38,6 +38,7 @@ app.use('*', notFoundHandler);
 // Загальний обробник помилок
 app.use(errorHandler);
 
+
 // Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -2,6 +2,7 @@
 
 import Contact from '../db/contactModel.js';
 import createError from 'http-errors';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
 export const getAllContactsService = async () => {
   const contacts = await Contact.find();
@@ -52,4 +53,22 @@ export const upsertContactService = async (id, payload, options = {}) => {
 export const deleteContactService = async (id) => {
   const deletedContact = await Contact.findByIdAndDelete(id);
   return deletedContact;
+};
+export const getAllContacts = async ({ page, perPage }) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
+
+  const ContactQuery = Contact.find();
+  const ContactCount = await Contact.find()
+    .merge(ContactQuery)
+    .countDocuments();
+
+  const Contact = await ContactQuery.skip(skip).limit(limit).exec();
+
+  const paginationData = calculatePaginationData(ContactCount, perPage, page);
+
+  return {
+    data: Contact,
+    ...paginationData,
+  };
 };

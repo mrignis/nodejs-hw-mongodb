@@ -7,6 +7,7 @@ import {
   upsertContactService,
   deleteContactService,
 } from '../services/contact.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -150,4 +151,18 @@ export const deleteContact = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const getContactsController = async (req, res) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const contacts = await getAllContacts({
+    page,
+    perPage,
+  });
+
+  res.json({
+    status: 200,
+    message: 'Successfully found Contacts!',
+    data: contacts,
+  });
 };
