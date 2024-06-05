@@ -1,32 +1,32 @@
 
 import mongoose from 'mongoose';
 import {
-  getAllContactsService,
+  getAllContacts,
   getContactByIdService,
   createContactService,
   upsertContactService,
   deleteContactService,
+ 
 } from '../services/contact.js';
+
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
-export const getAllContacts = async (req, res) => {
-  try {
-    const contacts = await getAllContactsService();
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: contacts,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 500,
-      message: 'Something went wrong',
-      error: error.message,
-    });
-  }
+export const getAllContactsService = async (req, res) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+
+  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder });
+
+  res.json({
+    status: 200,
+    message: 'Successfully found contacts!',
+    data: contacts,
+  });
 };
+
 
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
@@ -151,18 +151,4 @@ export const deleteContact = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-export const getContactsController = async (req, res) => {
-  const { page, perPage } = parsePaginationParams(req.query);
-  const contacts = await getAllContacts({
-    page,
-    perPage,
-  });
-
-  res.json({
-    status: 200,
-    message: 'Successfully found Contacts!',
-    data: contacts,
-  });
 };

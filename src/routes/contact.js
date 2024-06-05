@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  getAllContacts,
+  getAllContactsService,
   getContactById,
   createContact,
   updateContactController,
@@ -13,7 +13,7 @@ import { createContactSchema, updateContactSchema } from '../validation/contacts
 
 const router = express.Router();
 
-router.get('/contacts', ctrlWrapper(getAllContacts));
+router.get('/contacts', ctrlWrapper(getAllContactsService));
 router.get('/contacts/:contactId', ctrlWrapper(getContactById));
 router.post('/contacts', validateBody(createContactSchema), ctrlWrapper(createContact));
 router.put('/contacts/:contactId' ,validateBody(updateContactSchema), ctrlWrapper(updateContactController)); 

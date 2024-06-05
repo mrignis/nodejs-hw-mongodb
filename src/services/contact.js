@@ -1,13 +1,39 @@
+/* eslint-disable no-unused-vars */
 // src/services/contacts.js
 
 import Contact from '../db/contactModel.js';
 import createError from 'http-errors';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import {  SORT_ORDER,KEYS_OF_CONTACT } from '../constants/index.js';
 
-export const getAllContactsService = async () => {
-  const contacts = await Contact.find();
-  return contacts;
+
+
+export const getAllContacts = async ({
+  page = 1,
+  perPage = 3,
+  sortBy = KEYS_OF_CONTACT._id,
+  sortOrder = SORT_ORDER.ASC,
+  filter = {},
+}) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
+
+  const contactsQuery = Contact.find();
+  const contactsCount = await Contact.find()
+    .merge(contactsQuery)
+    .countDocuments();
+
+  const contacts = await contactsQuery
+    .skip(skip)
+    .limit(limit)
+    .sort({ [sortBy]: sortOrder })
+    .exec();
+
+  const paginationData = calculatePaginationData(contactsCount, page, perPage);
+
+  return { data: contacts, ...paginationData };
 };
+
 
 export const getContactByIdService = async (contactId) => {
   const contact = await Contact.findById(contactId);
@@ -26,11 +52,6 @@ export const createContactService = async (payload) => {
   await newContact.save();
   return newContact;
 };
-
-
-
-
-
 export const upsertContactService = async (id, payload, options = {}) => {
   
   const rawResult = await Contact.findByIdAndUpdate(id, payload, {
@@ -53,22 +74,4 @@ export const upsertContactService = async (id, payload, options = {}) => {
 export const deleteContactService = async (id) => {
   const deletedContact = await Contact.findByIdAndDelete(id);
   return deletedContact;
-};
-export const getAllContacts = async ({ page, perPage }) => {
-  const limit = perPage;
-  const skip = (page - 1) * perPage;
-
-  const ContactQuery = Contact.find();
-  const ContactCount = await Contact.find()
-    .merge(ContactQuery)
-    .countDocuments();
-
-  const Contact = await ContactQuery.skip(skip).limit(limit).exec();
-
-  const paginationData = calculatePaginationData(ContactCount, perPage, page);
-
-  return {
-    data: Contact,
-    ...paginationData,
-  };
 };
