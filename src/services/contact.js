@@ -1,11 +1,10 @@
-/* eslint-disable no-unused-vars */
+
 // src/services/contacts.js
 
 import Contact from '../db/contactModel.js';
 import createError from 'http-errors';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER, KEYS_OF_CONTACT } from '../constants/index.js';
-
 export const getAllContacts = async ({
   page = 1,
   perPage = 3,
@@ -17,9 +16,19 @@ export const getAllContacts = async ({
   const skip = (page - 1) * perPage;
 
   const contactsQuery = Contact.find().lean(); // додано .lean()
-  const contactsCount = await Contact.find()
-    .merge(contactsQuery)
-    .countDocuments();
+
+  // Додаємо умови фільтрації за полями
+  if (filter.name) {
+    contactsQuery.where('name').regex(new RegExp(filter.name, 'i')); // Пошук за частковим співпадінням (case-insensitive)
+  }
+  if (filter.email) {
+    contactsQuery.where('email').regex(new RegExp(filter.email, 'i'));
+  }
+  if (filter.isFavourite !== undefined) {
+    contactsQuery.where('isFavourite').equals(filter.isFavourite);
+  }
+
+  const contactsCount = await Contact.countDocuments(contactsQuery);
 
   const contacts = await contactsQuery
     .skip(skip)
@@ -37,6 +46,7 @@ export const getAllContacts = async ({
     ...paginationData 
   };
 };
+
 
 export const getContactByIdService = async (contactId) => {
   const contact = await Contact.findById(contactId).lean(); // додано .lean()

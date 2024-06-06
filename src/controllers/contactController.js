@@ -17,8 +17,14 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-f
 export const getAllContactsService = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
+ // Отримуємо фільтри з запиту
 
-  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder });
+ const filter = {
+  name: req.query.name,
+  email: req.query.email,
+  isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
+};
+  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter  });
 
   res.json({
     status: 200,
