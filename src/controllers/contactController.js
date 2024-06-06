@@ -61,9 +61,7 @@ export const getContactById = async (req, res) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    let newContact = await createContactService(req.body);
-    newContact = newContact.toObject();
-    delete newContact.__v;
+    const newContact = await createContactService(req.body);
 
     const payload = {
       status: 201,
