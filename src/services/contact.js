@@ -1,12 +1,9 @@
-/* eslint-disable no-unused-vars */
 // src/services/contacts.js
 
 import Contact from '../db/contactModel.js';
 import createError from 'http-errors';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
-import {  SORT_ORDER,KEYS_OF_CONTACT } from '../constants/index.js';
-
-
+import { SORT_ORDER, KEYS_OF_CONTACT } from '../constants/index.js';
 
 export const getAllContacts = async ({
   page = 1,
@@ -18,7 +15,7 @@ export const getAllContacts = async ({
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  const contactsQuery = Contact.find();
+  const contactsQuery = Contact.find().lean(); // додано .lean()
   const contactsCount = await Contact.find()
     .merge(contactsQuery)
     .countDocuments();
@@ -31,12 +28,20 @@ export const getAllContacts = async ({
 
   const paginationData = calculatePaginationData(contactsCount, page, perPage);
 
-  return { data: contacts, ...paginationData };
+  return { 
+    data: contacts.map(contact => {
+      delete contact.__v;
+      return contact;
+    }), 
+    ...paginationData 
+  };
 };
 
-
 export const getContactByIdService = async (contactId) => {
-  const contact = await Contact.findById(contactId);
+  const contact = await Contact.findById(contactId).lean(); // додано .lean()
+  if (contact) {
+    delete contact.__v;
+  }
   return contact;
 };
 
@@ -50,28 +55,34 @@ export const createContactService = async (payload) => {
     contactType,
   });
   await newContact.save();
-  return newContact;
+  const createdContact = newContact.toObject();
+  delete createdContact.__v;
+  return createdContact;
 };
+
 export const upsertContactService = async (id, payload, options = {}) => {
-  
   const rawResult = await Contact.findByIdAndUpdate(id, payload, {
     new: true,
     includeResultMetadata: true,
     ...options,
-  });
+  }).lean(); // додано .lean()
 
-  if (!rawResult || !rawResult.value) {
+  if (!rawResult) {
     throw createError(404, 'Contact not found');
   }
 
+  delete rawResult.__v;
+
   return {
-    contact: rawResult.value,
+    contact: rawResult,
     isNew: !rawResult?.lastErrorObject?.updatedExisting,
   };
 };
 
-
 export const deleteContactService = async (id) => {
-  const deletedContact = await Contact.findByIdAndDelete(id);
+  const deletedContact = await Contact.findByIdAndDelete(id).lean(); // додано .lean()
+  if (deletedContact) {
+    delete deletedContact.__v;
+  }
   return deletedContact;
 };
