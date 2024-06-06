@@ -27,7 +27,6 @@ export const getAllContactsService = async (req, res) => {
   });
 };
 
-
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
 

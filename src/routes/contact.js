@@ -15,9 +15,15 @@ const router = express.Router();
 
 router.get('/contacts', ctrlWrapper(getAllContactsService));
 router.get('/contacts/:contactId', ctrlWrapper(getContactById));
-router.post('/contacts', validateBody(createContactSchema), ctrlWrapper(createContact));
-router.put('/contacts/:contactId' ,validateBody(updateContactSchema), ctrlWrapper(updateContactController)); 
-router.patch('/contacts/:contactId',validateBody(updateContactSchema), ctrlWrapper(patchContactController));
+router.post('/contacts', 
+  validateBody(createContactSchema), 
+ctrlWrapper(createContact));
+router.put('/contacts/:contactId' ,
+  validateBody(updateContactSchema),
+ ctrlWrapper(updateContactController)); 
+router.patch('/contacts/:contactId',
+  validateBody(updateContactSchema),
+ ctrlWrapper(patchContactController));
 router.delete('/contacts/:contactId', ctrlWrapper(deleteContact));
 
 export default router;

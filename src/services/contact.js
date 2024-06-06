@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/services/contacts.js
 
 import Contact from '../db/contactModel.js';
