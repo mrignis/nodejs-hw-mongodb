@@ -13,17 +13,17 @@ import { createContactSchema, updateContactSchema } from '../validation/contacts
 
 const router = express.Router();
 
-router.get('/contacts', ctrlWrapper(getAllContactsService));
-router.get('/contacts/:contactId', ctrlWrapper(getContactById));
-router.post('/contacts', 
+router.get('/', ctrlWrapper(getAllContactsService));
+router.get('/:contactId', ctrlWrapper(getContactById));
+router.post('/', 
   validateBody(createContactSchema), 
 ctrlWrapper(createContact));
-router.put('/contacts/:contactId' ,
+router.put('/:contactId' ,
   validateBody(updateContactSchema),
  ctrlWrapper(updateContactController)); 
-router.patch('/contacts/:contactId',
+router.patch('/:contactId',
   validateBody(updateContactSchema),
  ctrlWrapper(patchContactController));
-router.delete('/contacts/:contactId', ctrlWrapper(deleteContact));
+router.delete('/:contactId', ctrlWrapper(deleteContact));
 
 export default router;
