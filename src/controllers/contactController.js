@@ -1,27 +1,42 @@
+// src/controllers/contactController.js
 import mongoose from 'mongoose';
-import { getAllContactsService, getContactByIdService } from '../services/contact.js';
+import {
+  getAllContacts,
+  getContactByIdService,
+  createContactService,
+  upsertContactService,
+  deleteContactService,
+ 
+} from '../services/contact.js';
 
-export const getAllContacts = async (req, res) => {
-  try {
-    const contacts = await getAllContactsService();
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: contacts,
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 404,
-      message: error.message,
-    });
-  }
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
+
+export const getAllContactsService = async (req, res) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+ // Отримуємо фільтри з запиту
+
+ const filter = {
+  name: req.query.name,
+  email: req.query.email,
+  isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
+};
+  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter  });
+
+  res.json({
+    status: 200,
+    message: 'Successfully found contacts!',
+    data: contacts,
+  });
 };
 
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
 
-  // Перевірка на дійсний ObjectId
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+  if (!isValidObjectId(contactId)) {
     return res.status(400).json({
       status: 400,
       message: 'Invalid contact ID format',
@@ -47,5 +62,96 @@ export const getContactById = async (req, res) => {
       message: `Failed to retrieve contact with id ${contactId}`,
       error: error.message,
     });
+  }
+};
+
+export const createContact = async (req, res, next) => {
+  try {
+    const newContact = await createContactService(req.body);
+
+    const payload = {
+      status: 201,
+      message: 'Successfully created a contact!',
+      data: newContact,
+    };
+    res.status(201).json(payload);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateContactController = async (req, res, next) => {
+  const { body } = req;
+  const { contactId } = req.params;
+
+  if (!isValidObjectId(contactId)) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Invalid contact ID format',
+    });
+  }
+
+  try {
+    const { isNew, contact } = await upsertContactService(contactId, body, {
+      upsert: true,
+    });
+
+    const status = isNew ? 201 : 200;
+
+    res.status(status).json({
+      status,
+      message: `Successfully upserted contact!`,
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const patchContactController = async (req, res, next) => {
+  const { body } = req;
+  const { contactId } = req.params;
+
+  if (!isValidObjectId(contactId)) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Invalid contact ID format',
+    });
+  }
+
+  try {
+    const { contact } = await upsertContactService(contactId, body);
+
+    res.status(200).json({
+      status: 200,
+      message: `Successfully patched contact!`,
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteContact = async (req, res, next) => {
+  const { contactId } = req.params;
+
+  if (!isValidObjectId(contactId)) {
+    return res.status(400).json({
+      status: 400,
+      message: 'Invalid contact ID format',
+    });
+  }
+
+  try {
+    const deletedContact = await deleteContactService(contactId);
+    if (!deletedContact) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Contact not found',
+      });
+    }
+    res.status(204).send();
+  } catch (error) {
+    next(error);
   }
 };

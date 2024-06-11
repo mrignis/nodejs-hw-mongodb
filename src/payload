@@ -1,0 +1,7 @@
+const payload = {
+  name: "John Doe",
+  phoneNumber: "+1234567890",
+  email: "john.doe@example.com",
+  isFavourite: true,
+  contactType: "personal"
+};
