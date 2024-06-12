@@ -1,4 +1,3 @@
-// src/controllers/contactController.js
 import mongoose from 'mongoose';
 import {
   getAllContacts,
@@ -6,7 +5,6 @@ import {
   createContactService,
   upsertContactService,
   deleteContactService,
- 
 } from '../services/contact.js';
 
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
@@ -17,14 +15,14 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-f
 export const getAllContactsService = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
- // Отримуємо фільтри з запиту
+  const filter = {
+    name: req.query.name,
+    email: req.query.email,
+    isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
+    userId: req.user._id,  // Додаємо фільтрацію за userId
+  };
 
- const filter = {
-  name: req.query.name,
-  email: req.query.email,
-  isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
-};
-  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter  });
+  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter });
 
   res.json({
     status: 200,
@@ -44,7 +42,7 @@ export const getContactById = async (req, res) => {
   }
 
   try {
-    const contact = await getContactByIdService(contactId);
+    const contact = await getContactByIdService(contactId, req.user._id);  // Додаємо userId
     if (!contact) {
       return res.status(404).json({
         status: 404,
@@ -67,7 +65,7 @@ export const getContactById = async (req, res) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const newContact = await createContactService(req.body);
+    const newContact = await createContactService({ ...req.body, userId: req.user._id });
 
     const payload = {
       status: 201,
@@ -92,7 +90,7 @@ export const updateContactController = async (req, res, next) => {
   }
 
   try {
-    const { isNew, contact } = await upsertContactService(contactId, body, {
+    const { isNew, contact } = await upsertContactService(contactId, body, req.user._id, {
       upsert: true,
     });
 
@@ -120,7 +118,7 @@ export const patchContactController = async (req, res, next) => {
   }
 
   try {
-    const { contact } = await upsertContactService(contactId, body);
+    const { contact } = await upsertContactService(contactId, body, req.user._id);
 
     res.status(200).json({
       status: 200,
@@ -143,7 +141,7 @@ export const deleteContact = async (req, res, next) => {
   }
 
   try {
-    const deletedContact = await deleteContactService(contactId);
+    const deletedContact = await deleteContactService(contactId, req.user._id);
     if (!deletedContact) {
       return res.status(404).json({
         status: 404,

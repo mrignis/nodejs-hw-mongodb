@@ -13,6 +13,7 @@ import { createContactSchema, updateContactSchema } from '../validation/contacts
 import { authenticate } from '../middlewares/authenticate.js'; 
 
 const router = express.Router();
+router.use(authenticate);
 
 router.get('/', authenticate, ctrlWrapper(getAllContactsService)); 
 router.get('/:contactId', authenticate, ctrlWrapper(getContactById)); 

@@ -1,10 +1,8 @@
-
-// src/services/contacts.js
-
 import Contact from '../db/contactModel.js';
 import createError from 'http-errors';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER, KEYS_OF_CONTACT } from '../constants/index.js';
+
 export const getAllContacts = async ({
   page = 1,
   perPage = 10,
@@ -15,21 +13,9 @@ export const getAllContacts = async ({
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  const contactsQuery = Contact.find().lean(); // додано .lean()
+  const contactsQuery = Contact.find(filter).lean(); // Використовуємо фільтр
 
-  // Додаємо умови фільтрації за полями
-  if (filter.name) {
-    contactsQuery.where('name').regex(new RegExp(filter.name, 'i')); // Пошук за частковим співпадінням (case-insensitive)
-  }
-  if (filter.email) {
-    contactsQuery.where('email').regex(new RegExp(filter.email, 'i'));
-  }
-  if (filter.isFavourite !== undefined) {
-    contactsQuery.where('isFavourite').equals(filter.isFavourite);
-  }
-
-  const contactsCount = await Contact.countDocuments(contactsQuery);
-
+  const contactsCount = await Contact.countDocuments(filter);
 
   const contacts = await contactsQuery
     .skip(skip)
@@ -48,9 +34,8 @@ export const getAllContacts = async ({
   };
 };
 
-
-export const getContactByIdService = async (contactId) => {
-  const contact = await Contact.findById(contactId).lean(); // додано .lean()
+export const getContactByIdService = async (contactId, userId) => {
+  const contact = await Contact.findOne({ _id: contactId, userId }).lean();  // Додаємо userId
   if (contact) {
     delete contact.__v;
   }
@@ -58,13 +43,14 @@ export const getContactByIdService = async (contactId) => {
 };
 
 export const createContactService = async (payload) => {
-  const { name, phoneNumber, email, isFavourite, contactType } = payload;
+  const { name, phoneNumber, email, isFavourite, contactType, userId } = payload;
   const newContact = new Contact({
     name,
     phoneNumber,
     email,
     isFavourite,
     contactType,
+    userId,
   });
   await newContact.save();
   const createdContact = newContact.toObject();
@@ -72,12 +58,16 @@ export const createContactService = async (payload) => {
   return createdContact;
 };
 
-export const upsertContactService = async (id, payload, options = {}) => {
-  const rawResult = await Contact.findByIdAndUpdate(id, payload, {
-    new: true,
-    includeResultMetadata: true,
-    ...options,
-  }).lean(); // додано .lean()
+export const upsertContactService = async (id, payload, userId, options = {}) => {
+  const rawResult = await Contact.findOneAndUpdate(
+    { _id: id, userId },  // Додаємо userId
+    payload, 
+    {
+      new: true,
+      includeResultMetadata: true,
+      ...options,
+    }
+  ).lean();
 
   if (!rawResult) {
     throw createError(404, 'Contact not found');
@@ -91,8 +81,8 @@ export const upsertContactService = async (id, payload, options = {}) => {
   };
 };
 
-export const deleteContactService = async (id) => {
-  const deletedContact = await Contact.findByIdAndDelete(id).lean(); // додано .lean()
+export const deleteContactService = async (id, userId) => {
+  const deletedContact = await Contact.findOneAndDelete({ _id: id, userId }).lean();  // Додаємо userId
   if (deletedContact) {
     delete deletedContact.__v;
   }
