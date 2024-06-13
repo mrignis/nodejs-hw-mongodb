@@ -44,16 +44,15 @@ export const getAllContacts = async ({
     ...paginationData,
   };
 };
-// src/services/contactService.js
+
 
 export const getContactByIdService = async (contactId, userId) => {
-  const contact = await Contact.find({ _id: contactId, userId }).lean(); // додано .lean()
+  const contact = await Contact.findOne({ _id: contactId, userId });
   if (contact) {
     delete contact.__v;
   }
   return contact;
 };
-
 export const createContactService = async (payload) => {
   const { name, phoneNumber, email, isFavourite, contactType, userId } = payload;
   const newContact = new Contact({
