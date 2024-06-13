@@ -36,7 +36,7 @@ export const getAllContactsService = async (req, res) => {
 
 export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
-  const { _id: userId } = req.user;
+  const { _id: userId } = req.user._id;
 
   if (!isValidObjectId(contactId)) {
     return res.status(400).json({
