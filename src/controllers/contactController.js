@@ -7,19 +7,22 @@ import {
   deleteContactService,
 } from '../services/contact.js';
 
+;
+
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 
-const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 export const getAllContactsService = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
+
   const filter = {
     name: req.query.name,
     email: req.query.email,
     isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
-    userId: req.user._id,  // Додаємо фільтрацію за userId
+    userId: req.user._id, 
   };
 
   const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter });
@@ -31,8 +34,9 @@ export const getAllContactsService = async (req, res) => {
   });
 };
 
-export const getContactById = async (req, res) => {
+export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
+  const { _id: userId } = req.user;
 
   if (!isValidObjectId(contactId)) {
     return res.status(400).json({
@@ -42,7 +46,7 @@ export const getContactById = async (req, res) => {
   }
 
   try {
-    const contact = await getContactByIdService(contactId, req.user._id); 
+    const contact = await getContactByIdService(contactId, userId);
     if (!contact) {
       return res.status(404).json({
         status: 404,
@@ -55,14 +59,9 @@ export const getContactById = async (req, res) => {
       data: contact,
     });
   } catch (error) {
-    res.status(500).json({
-      status: 500,
-      message: `Failed to retrieve contact with id ${contactId}`,
-      error: error.message,
-    });
+    next(error);
   }
 };
-
 export const createContact = async (req, res, next) => {
   try {
     const newContact = await createContactService({ ...req.body, userId: req.user._id });
