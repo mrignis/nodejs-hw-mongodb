@@ -42,7 +42,7 @@ export const getContactById = async (req, res) => {
   }
 
   try {
-    const contact = await getContactByIdService(contactId, req.user._id);  // Додаємо userId
+    const contact = await getContactByIdService(contactId, req.user._id); 
     if (!contact) {
       return res.status(404).json({
         status: 404,
