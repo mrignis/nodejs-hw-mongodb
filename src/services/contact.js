@@ -25,6 +25,9 @@ export const getAllContacts = async ({
   if (filter.isFavourite !== undefined) {
     contactsQuery.where('isFavourite').equals(filter.isFavourite);
   }
+  if (filter.userId) {
+    contactsQuery.where('userId').equals(filter.userId);
+  }
 
   const contactsCount = await Contact.countDocuments(contactsQuery.getFilter());
 
@@ -45,7 +48,6 @@ export const getAllContacts = async ({
   };
 };
 
-
 export const getContactByIdService = async (contactId, userId) => {
   const contact = await Contact.findOne({ _id: contactId, userId });
   if (contact) {
@@ -53,6 +55,7 @@ export const getContactByIdService = async (contactId, userId) => {
   }
   return contact;
 };
+
 export const createContactService = async (payload) => {
   const { name, phoneNumber, email, isFavourite, contactType, userId } = payload;
   const newContact = new Contact({

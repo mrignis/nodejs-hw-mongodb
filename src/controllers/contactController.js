@@ -10,8 +10,8 @@ import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 
-
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
+
 export const getAllContactsService = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
@@ -21,6 +21,7 @@ export const getAllContactsService = async (req, res) => {
     name: req.query.name,
     email: req.query.email,
     isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
+    userId: req.user._id,  // Додаємо userId
   };
 
   try {
