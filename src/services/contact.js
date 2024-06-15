@@ -3,17 +3,6 @@ import createError from 'http-errors';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER, KEYS_OF_CONTACT } from '../constants/index.js';
 
-/**
- * Get all contacts with pagination, sorting and filtering
- * @param {Object} params - Parameters for query
- * @param {number} params.page - Page number
- * @param {number} params.perPage - Items per page
- * @param {string} params.sortBy - Field to sort by
- * @param {string} params.sortOrder - Sort order
- * @param {Object} params.filter - Filter conditions
- * @param {string} userId - User ID
- * @returns {Object} - Contacts data and pagination info
- */
 export const getAllContacts = async ({
   page = 1,
   perPage = 3,
