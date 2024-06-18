@@ -1,5 +1,9 @@
 import createHttpError from 'http-errors';
-import { registerUserService, loginUserService, refreshSessionService, logoutUserService } from '../services/auth.js';
+import { registerUserService, loginUserService, refreshSessionService, logoutUserService, sendResetPasswordEmail,   } from '../services/auth.js';
+
+import User from '../db/userModel.js';
+import jwt from 'jsonwebtoken';
+
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -85,3 +89,60 @@ export const logoutUser = async (req, res, next) => {
     }
   };
   
+
+
+  export const sendResetEmail = async (req, res, next) => {
+    const { email } = req.body;
+  
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        throw createHttpError(404, 'User not found!');
+      }
+  
+      const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
+      const resetLink = `${process.env.APP_DOMAIN}/reset-password?token=${token}`;
+  
+      await sendResetPasswordEmail(email, resetLink);
+  
+      res.status(200).json({
+        status: 200,
+        message: 'Reset password email has been successfully sent.',
+        data: {},
+      });
+    // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      next(createHttpError(500, 'Failed to send the email, please try again later.'));
+    }
+  };
+
+
+
+
+
+
+export const resetPassword = async (req, res, next) => {
+  const { token, password } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { email } = decoded;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw createHttpError(404, 'User not found!');
+    }
+
+    user.password = password;
+    await user.save();
+
+    res.status(200).json({
+      status: 200,
+      message: 'Password has been successfully reset.',
+      data: {},
+    });
+  // eslint-disable-next-line no-unused-vars
+  } catch (Error) {
+    next(createHttpError(401, 'Token is expired or invalid.'));
+  }
+};
