@@ -1,3 +1,5 @@
+// src/db/user.js
+
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -20,4 +22,6 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-export const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+
+export default User;

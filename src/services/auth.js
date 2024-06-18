@@ -2,7 +2,7 @@
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '../db/user.js';
+import User  from '../db/user.js';
 import { Session } from '../db/Session.js';
 
 import { SMTP } from '../constants/index.js';
@@ -79,7 +79,7 @@ export const logoutUserService = async (refreshToken) => {
 };
 
 
-export const requestResetToken = async (email) => {
+export const sendResetPasswordEmail = async (email) => {
   const user = await User.findOne({ email });
   if (!user) {
     throw createHttpError(404, 'User not found');

@@ -1,9 +1,13 @@
+import  User  from '../db/user.js';
 import createHttpError from 'http-errors';
-import { registerUserService, loginUserService, refreshSessionService, logoutUserService, sendResetPasswordEmail,   } from '../services/auth.js';
-
-import User from '../db/userModel.js';
+import {
+  registerUserService,
+  loginUserService,
+  refreshSessionService,
+  logoutUserService,
+  sendResetPasswordEmail,
+} from '../services/auth.js';
 import jwt from 'jsonwebtoken';
-
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -14,8 +18,7 @@ export const registerUser = async (req, res, next) => {
 
   try {
     const newUser = await registerUserService({ name, email, password });
-
-    const {  ...userData } = newUser.toObject();
+    const { ...userData } = newUser.toObject();
 
     res.status(201).json({
       status: 201,
@@ -35,7 +38,7 @@ export const loginUser = async (req, res, next) => {
   }
 
   try {
-    const {  accessToken, refreshToken } = await loginUserService({ email, password });
+    const { accessToken, refreshToken } = await loginUserService({ email, password });
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
 
@@ -72,56 +75,48 @@ export const refreshSession = async (req, res, next) => {
 };
 
 export const logoutUser = async (req, res, next) => {
-    const refreshToken = req.cookies.refreshToken;
-  
-    if (!refreshToken) {
-      return next(createHttpError(400, 'Refresh token is required'));
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return next(createHttpError(400, 'Refresh token is required'));
+  }
+
+  try {
+    await logoutUserService(refreshToken);
+
+    res.clearCookie('refreshToken');
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const requestResetEmailController = async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw createHttpError(404, 'User not found!');
     }
-  
-    try {
-      await logoutUserService(refreshToken);
-  
-      res.clearCookie('refreshToken');
-  
-      res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  };
-  
 
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
+    const resetLink = `${process.env.APP_DOMAIN}/reset-password?token=${token}`;
 
-  export const sendResetEmail = async (req, res, next) => {
-    const { email } = req.body;
-  
-    try {
-      const user = await User.findOne({ email });
-      if (!user) {
-        throw createHttpError(404, 'User not found!');
-      }
-  
-      const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
-      const resetLink = `${process.env.APP_DOMAIN}/reset-password?token=${token}`;
-  
-      await sendResetPasswordEmail(email, resetLink);
-  
-      res.status(200).json({
-        status: 200,
-        message: 'Reset password email has been successfully sent.',
-        data: {},
-      });
-    // eslint-disable-next-line no-unused-vars
-    } catch (error) {
-      next(createHttpError(500, 'Failed to send the email, please try again later.'));
-    }
-  };
+    await sendResetPasswordEmail(email, resetLink);
 
+    res.status(200).json({
+      status: 200,
+      message: 'Reset password email has been successfully sent.',
+      data: {},
+    });
+  } catch (error) {
+    next(createHttpError(500, `Failed to send the email, please try again later. Error: ${error.message}`));
+  }
+};
 
-
-
-
-
-export const resetPassword = async (req, res, next) => {
+export const resetPasswordController = async (req, res, next) => {
   const { token, password } = req.body;
 
   try {
@@ -141,8 +136,7 @@ export const resetPassword = async (req, res, next) => {
       message: 'Password has been successfully reset.',
       data: {},
     });
-  // eslint-disable-next-line no-unused-vars
-  } catch (Error) {
-    next(createHttpError(401, 'Token is expired or invalid.'));
+  } catch (error) {
+    next(createHttpError(401, `Token is expired or invalid. Error: ${error.message}`));
   }
 };

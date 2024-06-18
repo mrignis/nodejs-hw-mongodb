@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
-import { User } from '../db/user.js';
+import  User  from '../db/user.js';
 
 const JWT_SECRET = 'your_jwt_secret';
 
