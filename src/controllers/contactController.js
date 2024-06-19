@@ -1,3 +1,4 @@
+// src/controllers/contactController.js
 import mongoose from 'mongoose';
 import {
   getAllContacts,
@@ -10,7 +11,6 @@ import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { uploadToCloudinary } from '../services/cloudinary.js';
-import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -18,11 +18,12 @@ export const getAllContactsService = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
 
+  // Отримуємо фільтри з запиту
   const filter = {
     name: req.query.name,
     email: req.query.email,
     isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
-    userId: req.user._id,
+    userId: req.user._id,  // Додаємо userId
   };
 
   try {
@@ -62,13 +63,7 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    let photoUrl = null;
-
-    if (req.file) {
-      photoUrl = await uploadToCloudinary(req.file.path);
-    }
-
-    const newContact = await createContactService({ ...req.body, userId: req.user._id, photo: photoUrl });
+    const newContact = await createContactService({ ...req.body, userId: req.user._id });
 
     const payload = {
       status: 201,
@@ -99,14 +94,10 @@ export const updateContactController = async (req, res, next) => {
       photoUrl = await uploadToCloudinary(req.file.path);
     }
 
-    const { isNew, contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id, {
-      upsert: true,
-    });
+    const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
 
-    const status = isNew ? 201 : 200;
-
-    res.status(status).json({
-      status,
+    res.status(200).json({
+      status: 200,
       message: `Successfully upserted contact!`,
       data: contact,
     });
@@ -116,31 +107,35 @@ export const updateContactController = async (req, res, next) => {
 };
 
 export const patchContactController = async (req, res, next) => {
+  const { body } = req;
   const { contactId } = req.params;
-  const photo = req.file;
 
-  let photoUrl;
-
-  if (photo) {
-    photoUrl = await saveFileToUploadDir(photo);
+  if (!isValidObjectId(contactId)) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Invalid contact ID format',
+    });
   }
 
-  const result = await updateContactController(contactId, {
-    ...req.body,
-    photo: photoUrl,
-  });
+  try {
+    let photoUrl = body.photo || null;
 
-  if (!result) {
-    next(createHttpError(404, 'Student not found'));
-    return;
+    if (req.file) {
+      photoUrl = await uploadToCloudinary(req.file.path);
+    }
+
+    const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
+
+    res.status(200).json({
+      status: 200,
+      message: `Successfully patched contact!`,
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  res.json({
-    status: 200,
-    message: `Successfully patched a student!`,
-    data: result.student,
-  });
 };
+
 export const deleteContact = async (req, res, next) => {
   const { contactId } = req.params;
 

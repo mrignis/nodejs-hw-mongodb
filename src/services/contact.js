@@ -14,7 +14,7 @@ export const getAllContacts = async ({
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  // Здійснюємо пошук контактів по userId
+  // Здійснюємо пошук контактів за userId
   const contactsQuery = Contact.find({ userId }).lean();
 
   // Додаємо умови фільтрації за полями
