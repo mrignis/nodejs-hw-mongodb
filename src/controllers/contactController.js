@@ -9,6 +9,7 @@ import {
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { uploadToCloudinary } from '../services/cloudinary.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -16,12 +17,11 @@ export const getAllContactsService = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
 
-  // Отримуємо фільтри з запиту
   const filter = {
     name: req.query.name,
     email: req.query.email,
     isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
-    userId: req.user._id,  // Додаємо userId
+    userId: req.user._id,
   };
 
   try {
@@ -61,7 +61,13 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const newContact = await createContactService({ ...req.body, userId: req.user._id });
+    let photoUrl = null;
+
+    if (req.file) {
+      photoUrl = await uploadToCloudinary(req.file.path);
+    }
+
+    const newContact = await createContactService({ ...req.body, userId: req.user._id, photo: photoUrl });
 
     const payload = {
       status: 201,
@@ -86,7 +92,13 @@ export const updateContactController = async (req, res, next) => {
   }
 
   try {
-    const { isNew, contact } = await upsertContactService(contactId, body, req.user._id, {
+    let photoUrl = body.photo || null;
+
+    if (req.file) {
+      photoUrl = await uploadToCloudinary(req.file.path);
+    }
+
+    const { isNew, contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id, {
       upsert: true,
     });
 
@@ -114,7 +126,13 @@ export const patchContactController = async (req, res, next) => {
   }
 
   try {
-    const { contact } = await upsertContactService(contactId, body, req.user._id);
+    let photoUrl = body.photo || null;
+
+    if (req.file) {
+      photoUrl = await uploadToCloudinary(req.file.path);
+    }
+
+    const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
 
     res.status(200).json({
       status: 200,
