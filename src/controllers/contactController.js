@@ -10,6 +10,7 @@ import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { uploadToCloudinary } from '../services/cloudinary.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -115,35 +116,31 @@ export const updateContactController = async (req, res, next) => {
 };
 
 export const patchContactController = async (req, res, next) => {
-  const { body } = req;
   const { contactId } = req.params;
+  const photo = req.file;
 
-  if (!isValidObjectId(contactId)) {
-    return res.status(404).json({
-      status: 404,
-      message: 'Invalid contact ID format',
-    });
+  let photoUrl;
+
+  if (photo) {
+    photoUrl = await saveFileToUploadDir(photo);
   }
 
-  try {
-    let photoUrl = body.photo || null;
+  const result = await updateContactController(contactId, {
+    ...req.body,
+    photo: photoUrl,
+  });
 
-    if (req.file) {
-      photoUrl = await uploadToCloudinary(req.file.path);
-    }
-
-    const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
-
-    res.status(200).json({
-      status: 200,
-      message: `Successfully patched contact!`,
-      data: contact,
-    });
-  } catch (error) {
-    next(error);
+  if (!result) {
+    next(createHttpError(404, 'Student not found'));
+    return;
   }
+
+  res.json({
+    status: 200,
+    message: `Successfully patched a student!`,
+    data: result.student,
+  });
 };
-
 export const deleteContact = async (req, res, next) => {
   const { contactId } = req.params;
 
