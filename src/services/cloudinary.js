@@ -13,7 +13,7 @@ cloudinary.config({
 export const uploadToCloudinary = async (filePath) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
-      folder: 'contacts_photos', // Ви можете вказати свою директорію в Cloudinary
+      folder: 'contacts_photos', 
     });
     return result.secure_url; // Повертає URL завантаженого фото
   } catch (error) {

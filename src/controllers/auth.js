@@ -1,3 +1,4 @@
+// src/controllers/auth.js
 import  User  from '../db/user.js';
 import createHttpError from 'http-errors';
 import {
@@ -92,29 +93,16 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
-export const requestResetEmailController = async (req, res, next) => {
-  const { email } = req.body;
+export const sendResetPasswordEmailController = async (req, res) => {
+  await sendResetPasswordEmail(req.body.email);
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      throw createHttpError(404, 'User not found!');
-    }
-
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
-    const resetLink = `${process.env.APP_DOMAIN}/reset-password?token=${token}`;
-
-    await sendResetPasswordEmail(email, resetLink);
-
-    res.status(200).json({
-      status: 200,
-      message: 'Reset password email has been successfully sent.',
-      data: {},
-    });
-  } catch (error) {
-    next(createHttpError(500, `Failed to send the email, please try again later. Error: ${error.message}`));
-  }
+  res.json({
+    status: 200,
+    message: 'Reset password email was successfully sent!',
+    data: {},
+  });
 };
+
 
 export const resetPasswordController = async (req, res, next) => {
   const { token, password } = req.body;

@@ -4,13 +4,15 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User  from '../db/user.js';
 import { Session } from '../db/Session.js';
-
-import { SMTP } from '../constants/index.js';
+import path from 'path';
+import { SMTP,TEMPLATE_DIR } from '../constants/index.js';
 import { env } from '../utils/env.js';
-import { sendEmail } from '../utils/sendMail.js';
+import { sendMail } from '../utils/sendMail.js';
 const JWT_SECRET = 'your_jwt_secret';
 const JWT_ACCESS_EXPIRATION = '15m';
 const JWT_REFRESH_EXPIRATION = '30d';
+import fs from 'fs';
+import Handlebars from 'handlebars';
 
 export const registerUserService = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
@@ -78,7 +80,6 @@ export const logoutUserService = async (refreshToken) => {
   }
 };
 
-
 export const sendResetPasswordEmail = async (email) => {
   const user = await User.findOne({ email });
   if (!user) {
@@ -95,7 +96,7 @@ export const sendResetPasswordEmail = async (email) => {
     },
   );
 
-  await sendEmail({
+  await sendMail({
     from: env(SMTP.SMTP_FROM),
     to: email,
     subject: 'Reset your password',
