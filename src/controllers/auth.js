@@ -1,14 +1,15 @@
 // src/controllers/auth.js
-import  User  from '../db/user.js';
+
 import createHttpError from 'http-errors';
 import {
   registerUserService,
   loginUserService,
   refreshSessionService,
   logoutUserService,
-  sendResetPasswordEmail,
+  resetPassword,
+  sendResetPasswordEmail
 } from '../services/auth.js';
-import jwt from 'jsonwebtoken';
+
 
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -104,27 +105,12 @@ export const sendResetPasswordEmailController = async (req, res) => {
 };
 
 
-export const resetPasswordController = async (req, res, next) => {
-  const { token, password } = req.body;
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { email } = decoded;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      throw createHttpError(404, 'User not found!');
-    }
-
-    user.password = password;
-    await user.save();
-
-    res.status(200).json({
-      status: 200,
-      message: 'Password has been successfully reset.',
-      data: {},
-    });
-  } catch (error) {
-    next(createHttpError(401, `Token is expired or invalid. Error: ${error.message}`));
-  }
+  res.json({
+    status: 200,
+    message: 'Password was successfully reset!',
+    data: {},
+  });
 };

@@ -68,8 +68,9 @@ export const getContactByIdService = async (contactId, userId) => {
  * @returns {Object} - Created contact data
  */
 export const createContactService = async (payload) => {
-  const { name, phoneNumber, email, isFavourite, contactType, userId } = payload;
+  const { name, phoneNumber, email, isFavourite, contactType, userId,photo } = payload;
   const newContact = new Contact({
+    photo,
     name,
     phoneNumber,
     email,
