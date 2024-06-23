@@ -34,6 +34,8 @@ export const KEYS_OF_CONTACT = {
   contactType: 'contactType',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+userId: 'userId',
+  photo: 'photo',
 };
 
 export const SMTP = {
