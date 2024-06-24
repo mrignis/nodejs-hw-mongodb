@@ -10,7 +10,6 @@ import {
   sendResetPasswordEmail
 } from '../services/auth.js';
 
-
 export const registerUser = async (req, res, next) => {
   const { name, email, password } = req.body;
 
@@ -20,7 +19,8 @@ export const registerUser = async (req, res, next) => {
 
   try {
     const newUser = await registerUserService({ name, email, password });
-    const { ...userData } = newUser.toObject();
+    const userData = newUser.toObject ? newUser.toObject() : newUser;
+    delete userData.__v;
 
     res.status(201).json({
       status: 201,
@@ -31,6 +31,7 @@ export const registerUser = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;

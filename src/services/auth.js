@@ -15,6 +15,9 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 
 
+
+
+
 export const registerUserService = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
