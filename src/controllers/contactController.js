@@ -76,6 +76,8 @@ export const createContact = async (req, res, next) => {
   }
 };
 
+
+
 export const updateContactController = async (req, res, next) => {
   const { body } = req;
   const { contactId } = req.params;
@@ -99,13 +101,15 @@ export const updateContactController = async (req, res, next) => {
     res.status(200).json({
       status: 200,
       message: `Successfully upserted contact!`,
-      data: contact,
+      data: {
+        ...contact,
+        lastErrorObject: undefined // Виключити lastErrorObject з відповіді
+      },
     });
   } catch (error) {
     next(error);
   }
 };
-
 export const patchContactController = async (req, res, next) => {
   const { body } = req;
   const { contactId } = req.params;

@@ -1,3 +1,4 @@
+// src/services/contact.js
 import Contact from '../db/contactModel.js';
 import createError from 'http-errors';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
@@ -76,13 +77,16 @@ export const createContactService = async (payload) => {
  * @param {Object} options - Options for update
  * @returns {Object} - Updated contact data and flag indicating if it's new
  */
+// src/services/contactService.js
+
+
 export const upsertContactService = async (id, payload, userId, options = {}) => {
   const rawResult = await Contact.findOneAndUpdate(
-    { _id: id, userId },  // Додаємо userId
+    { _id: id, userId },
     payload, 
     {
       new: true,
-      includeResultMetadata: true,
+      upsert: true,
       ...options,
     }
   ).lean();
@@ -95,7 +99,7 @@ export const upsertContactService = async (id, payload, userId, options = {}) =>
 
   return {
     contact: rawResult,
-    isNew: !rawResult?.lastErrorObject?.updatedExisting,
+    isNew: !rawResult.updatedExisting, // Updated logic to check if it's a new contact
   };
 };
 
