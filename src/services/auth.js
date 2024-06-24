@@ -95,7 +95,7 @@ export const sendResetPasswordEmail = async (email) => {
     },
     env(ENV_VARS.JWT_SECRET),
     {
-      expiresIn: 1,
+      expiresIn: '5m', // встановлюємо термін дії токену на 5 хвилин
     },
   );
 
@@ -123,8 +123,7 @@ export const sendResetPasswordEmail = async (email) => {
   }
 };
 
-
-export const resetPassword  = async ({ token, password }) => {
+export const resetPassword = async ({ token, password }) => {
   let tokenPayload;
   try {
     tokenPayload = jwt.verify(token, env(ENV_VARS.JWT_SECRET));
