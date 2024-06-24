@@ -8,7 +8,7 @@ import { Session } from '../db/Session.js';
 import { TEMPLATES_DIR,ENV_VARS } from '../constants/index.js';
 import { env } from '../utils/env.js';
 import { sendMail } from '../utils/sendMail.js';
-const JWT_SECRET = 'your_jwt_secret';
+const JWT_SECRET =' SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c '
 const JWT_ACCESS_EXPIRATION = '15m';
 const JWT_REFRESH_EXPIRATION = '30d';
 import Handlebars from 'handlebars';
