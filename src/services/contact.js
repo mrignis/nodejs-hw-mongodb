@@ -5,47 +5,32 @@ import { SORT_ORDER, KEYS_OF_CONTACT } from '../constants/index.js';
 
 export const getAllContacts = async ({
   page = 1,
-  perPage = 3,
+  perPage = 10,
   sortBy = KEYS_OF_CONTACT._id,
   sortOrder = SORT_ORDER.ASC,
   filter = {},
-  userId,
+  userId
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  // Здійснюємо пошук контактів по userId
-  const contactsQuery = Contact.find({ userId }).lean();
 
-  // Додаємо умови фільтрації за полями
-  if (filter.name) {
-    contactsQuery.where('name').regex(new RegExp(filter.name, 'i')); // Пошук за частковим співпадінням (case-insensitive)
-  }
-  if (filter.email) {
-    contactsQuery.where('email').regex(new RegExp(filter.email, 'i'));
-  }
-  if (filter.isFavourite !== undefined) {
-    contactsQuery.where('isFavourite').equals(filter.isFavourite);
-  }
 
-  const contactsCount = await Contact.countDocuments(contactsQuery.getFilter());
-
-  const contacts = await contactsQuery
-    .skip(skip)
-    .limit(limit)
-    .sort({ [sortBy]: sortOrder })
-    .exec();
+  const [contactsCount, contacts] = await Promise.all([
+    Contact.find({ ...filter, userId }).countDocuments(),
+    Contact.find({ ...filter, userId })
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder })
+      .exec(),
+  ]);
 
   const paginationData = calculatePaginationData(contactsCount, page, perPage);
 
-  return {
-    data: contacts.map(contact => {
-      delete contact.__v;
-      return contact;
-    }),
-    ...paginationData,
-  };
+  return { data: contacts, ...paginationData };
 };
+
+
 /**
  * Get a contact by ID and userId
  * @param {string} contactId - Contact ID

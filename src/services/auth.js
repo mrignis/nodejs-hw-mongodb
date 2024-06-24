@@ -4,16 +4,17 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User  from '../db/user.js';
 import { Session } from '../db/Session.js';
-
 import { TEMPLATES_DIR,ENV_VARS } from '../constants/index.js';
 import { env } from '../utils/env.js';
 import { sendMail } from '../utils/sendMail.js';
-const JWT_SECRET =' SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c ';
+const JWT_SECRET = 'your_jwt_secret';
 const JWT_ACCESS_EXPIRATION = '15m';
 const JWT_REFRESH_EXPIRATION = '30d';
 import Handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+
+
 export const registerUserService = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -94,7 +95,7 @@ export const sendResetPasswordEmail = async (email) => {
     },
     env(ENV_VARS.JWT_SECRET),
     {
-      expiresIn: '5m', // встановлюємо термін дії токену на 5 хвилин
+      expiresIn: 1,
     },
   );
 
@@ -122,7 +123,8 @@ export const sendResetPasswordEmail = async (email) => {
   }
 };
 
-export const resetPassword = async ({ token, password }) => {
+
+export const resetPassword  = async ({ token, password }) => {
   let tokenPayload;
   try {
     tokenPayload = jwt.verify(token, env(ENV_VARS.JWT_SECRET));
