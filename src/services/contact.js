@@ -9,7 +9,7 @@ export const getAllContacts = async ({
   sortBy = KEYS_OF_CONTACT._id,
   sortOrder = SORT_ORDER.ASC,
   filter = {},
-  
+  userId
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
