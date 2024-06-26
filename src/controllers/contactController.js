@@ -11,6 +11,7 @@ import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { uploadToCloudinary } from '../services/cloudinary.js';
+import { saveFile } from '../utils/saveFile.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -63,7 +64,17 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const newContact = await createContactService({ ...req.body, userId: req.user._id });
+    if (!req.user || !req.user._id) {
+      throw new Error('User ID not found');
+    }
+
+    const photoUrl = await saveFile(req.file); // Отримання посилання на збережений файл
+
+    const newContact = await createContactService({
+      ...req.body,
+      userId: req.user._id,
+      photo: photoUrl,
+    });
 
     const payload = {
       status: 201,

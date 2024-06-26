@@ -1,9 +1,6 @@
-
-// src/utils/saveFileToUploadDir.js
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { UPLOAD_DIR } from '../constants/index.js';
-import { env } from './env.js';
 
 export const saveFileToLocalMachine = async (file) => {
   const content = await fs.readFile(file.path);
@@ -11,8 +8,8 @@ export const saveFileToLocalMachine = async (file) => {
   await fs.writeFile(newPath, content);
   await fs.unlink(file.path);
 
-  const backendHost = env(process.env.BACKEND_HOST);
-  const photoUrl = `${backendHost}/upload/${file.filename}`;
-
+  const backendHost = process.env.BACKEND_HOST || 'http://localhost:3000'; // Замініть на ваше актуальне значення
+  const photoUrl = `${backendHost}/uploads/${file.filename}`;
+  
   return photoUrl;
 };

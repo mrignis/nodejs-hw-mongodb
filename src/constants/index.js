@@ -1,4 +1,5 @@
 import path from 'path';
+import multer from 'multer';
 
 export const ENV_VARS = {
   PORT: 'PORT',
@@ -48,3 +49,15 @@ export const SMTP = {
 export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
 export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
 export const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, TEMP_UPLOAD_DIR);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now();
+    cb(null, `${uniqueSuffix}_${file.originalname}`);
+  },
+});
+
+export const upload = multer({ storage });
