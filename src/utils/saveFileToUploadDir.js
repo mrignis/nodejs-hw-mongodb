@@ -1,15 +1,18 @@
-// src/utils/saveFileToUploadDir.js
 
-import path from 'node:path';
+// src/utils/saveFileToUploadDir.js
 import fs from 'node:fs/promises';
-import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from '../constants/index.js';
+import path from 'node:path';
+import { UPLOAD_DIR } from '../constants/index.js';
 import { env } from './env.js';
 
-export const saveFileToUploadDir = async (file) => {
-  await fs.rename(
-    path.join(TEMP_UPLOAD_DIR, file.filename),
-    path.join(UPLOAD_DIR, file.filename),
-  );
+export const saveFileToLocalMachine = async (file) => {
+  const content = await fs.readFile(file.path);
+  const newPath = path.join(UPLOAD_DIR, file.filename);
+  await fs.writeFile(newPath, content);
+  await fs.unlink(file.path);
 
-  return `${env('APP_DOMAIN')}/uploads/${file.filename}`;
+  const backendHost = env(process.env.BACKEND_HOST);
+  const photoUrl = `${backendHost}/uploads/${file.filename}`;
+
+  return photoUrl;
 };

@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
+import fs from 'fs/promises';
 
 dotenv.config();
 
@@ -10,15 +11,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const uploadToCloudinary = async (filePath) => {
-  try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: 'contacts_photos', 
-    });
-    return result.secure_url; // Повертає URL завантаженого фото
-  } catch (error) {
-    throw new error('Failed to upload image to Cloudinary');
-  }
-};
+export const uploadToCloudinary =async (file) => {
+  const res = await cloudinary.uploader.upload(file.path);
+  await fs.unlink(file.path);
 
+  return res.secure_url;
+};
 export default cloudinary;

@@ -3,6 +3,7 @@ import Contact from '../db/contactModel.js';
 import createError from 'http-errors';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER, KEYS_OF_CONTACT } from '../constants/index.js';
+import { saveFile } from '../utils/saveFile.js';
 
 export const getAllContacts = async ({
   page = 1,
@@ -52,23 +53,28 @@ export const getContactByIdService = async (contactId, userId) => {
  * @param {Object} payload - Contact data
  * @returns {Object} - Created contact data
  */
-export const createContactService = async (payload) => {
-  const { name, phoneNumber, email, isFavourite, contactType, userId,photo } = payload;
+
+
+export const createContactService = async ({ photo, ...payload }) => {
+  let photoUrl = " url " ;
+
+  if (photo) {
+    const url = await saveFile(photo); // Assuming saveFile is a function that saves the photo and returns the URL
+    photoUrl = url;
+  }
+
   const newContact = new Contact({
-    photo,
-    name,
-    phoneNumber,
-    email,
-    isFavourite,
-    contactType,
-    userId,
+    ...payload,
+    photo: photoUrl,
   });
+
   await newContact.save();
+
   const createdContact = newContact.toObject();
   delete createdContact.__v;
+
   return createdContact;
 };
-
 /**
  * Update or insert a contact
  * @param {string} id - Contact ID

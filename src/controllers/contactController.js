@@ -63,19 +63,38 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
+    // Перевірка наявності ідентифікатора користувача
+    if (!req.user || !req.user._id) {
+      throw new Error('User ID not found');
+    }
+
+    // Створення нового контакту, додаючи userId з req.user._id
     const newContact = await createContactService({ ...req.body, userId: req.user._id });
 
+    // Підготовка відповіді в JSON форматі
     const payload = {
       status: 201,
       message: 'Successfully created a contact!',
-      data: newContact,
+      data: {
+        name: newContact.name,
+        phoneNumber: newContact.phoneNumber,
+        photo: newContact.photo,
+        isFavourite: newContact.isFavourite,
+        userId: newContact.userId,
+        contactType: newContact.contactType,
+        _id: newContact._id,
+        createdAt: newContact.createdAt,
+        updatedAt: newContact.updatedAt,
+      },
     };
+
+    // Відправка відповіді клієнту
     res.status(201).json(payload);
   } catch (error) {
+    // Обробка помилок і передача їх до middleware обробника помилок
     next(error);
   }
 };
-
 
 
 export const updateContactController = async (req, res, next) => {
