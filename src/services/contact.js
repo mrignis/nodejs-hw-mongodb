@@ -56,7 +56,7 @@ export const getContactByIdService = async (contactId, userId) => {
 
 
 export const createContactService = async ({ photo, ...payload }) => {
-  let photoUrl = " url " ;
+  let photoUrl = " " ;
 
   if (photo) {
     const url = await saveFile(photo); // Assuming saveFile is a function that saves the photo and returns the URL

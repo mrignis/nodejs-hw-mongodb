@@ -12,7 +12,7 @@ export const saveFileToLocalMachine = async (file) => {
   await fs.unlink(file.path);
 
   const backendHost = env(process.env.BACKEND_HOST);
-  const photoUrl = `${backendHost}/uploads/${file.filename}`;
+  const photoUrl = `${backendHost}/upload/${file.filename}`;
 
   return photoUrl;
 };
