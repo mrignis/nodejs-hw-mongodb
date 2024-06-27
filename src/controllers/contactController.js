@@ -10,9 +10,7 @@ import {
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
-import { uploadToCloudinary } from '../services/cloudinary.js';
 import { saveFile } from '../utils/saveFile.js';
-import { saveFileToLocalMachine } from '../utils/saveFileToUploadDir.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 

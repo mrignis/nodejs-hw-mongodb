@@ -13,8 +13,18 @@ const JWT_REFRESH_EXPIRATION = '30d';
 import Handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import {validateGoogleOAuthCode} from "../utils/googleOAuth.js";
 
 
+
+const createSession = () => {
+  return {
+    accessToken: crypto.randomBytes(40).toString('base64'),
+    refreshToken: crypto.randomBytes(40).toString('base64'),
+    accessTokenValidUntil: Date.now() + 1000 * 60 * 15, // 15 minutes,
+    refreshTokenValidUntil: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days,
+  };
+};
 
 
 
@@ -143,4 +153,35 @@ export const resetPassword = async ({ token, password }) => {
     },
     { password: hashedPassword },
   );
+};
+
+
+export const loginOrSignupWithGoogleOAuth = async (code) => {
+  const payload = await validateGoogleOAuthCode(code);
+
+  if (!payload) throw createHttpError(401);
+
+  let user = await User.findOne({ email: payload.email });
+
+  if (!user) {
+    const hashedPassword = await bcrypt.hash(
+      crypto.randomBytes(40).toString('base64'),
+      10,
+    );
+
+    user = await User.create({
+      name: payload.given_name + ' ' + payload.family_name,
+      email: payload.email,
+      password: hashedPassword,
+    });
+  }
+
+  await Session.deleteOne({
+    userId: user._id,
+  });
+
+  return await Session.create({
+    userId: user._id,
+    ...createSession(),
+  });
 };

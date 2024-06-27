@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
 import router from './routes/index.js';
+import apiDocsRouter from './routes/apiDocs.js';
 
 
 dotenv.config();
@@ -15,7 +16,9 @@ const PORT = Number(env('PORT', '3000')) || process.env.PORT || 3000;
 
 export const setupServer = () => {
   const app = express();
-
+ 
+  app.use('/', apiDocsRouter);
+  
   app.use(
     express.json({
       type: ['application/json', 'application/vnd.api+json'],
