@@ -12,6 +12,7 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { uploadToCloudinary } from '../services/cloudinary.js';
 import { saveFile } from '../utils/saveFile.js';
+import { saveFileToLocalMachine } from '../utils/saveFileToUploadDir.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -68,8 +69,11 @@ export const createContact = async (req, res, next) => {
       throw new Error('User ID not found');
     }
 
-    const photoUrl = await saveFile(req.file); // Отримання посилання на збережений файл
-
+    let photoUrl = req.body.photo;
+ 
+    if (req.file) {
+      photoUrl = await saveFile(req.file);
+    } // Отримання посилання на збережений файл
     const newContact = await createContactService({
       ...req.body,
       userId: req.user._id,
@@ -105,6 +109,9 @@ export const updateContactController = async (req, res, next) => {
 
     if (req.file) {
       photoUrl = await uploadToCloudinary(req.file.path);
+    }
+    if (req.file) {
+      photoUrl = await saveFileToLocalMachine(req.file.path);
     }
 
     const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
