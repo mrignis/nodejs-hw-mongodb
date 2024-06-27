@@ -1,0 +1,141 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Node.js HW MongoDB API",
+      "license": {
+        "name": "Apache 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      },
+      "description": "API documentation for Node.js HW MongoDB application."
+    },
+    "tags": [
+      {
+        "name": "Contacts",
+        "description": "Operations related to contacts."
+      }
+    ],
+    "servers": [
+      {
+        "url": "http://localhost:3000",
+        "description": "Local development server."
+      },
+      {
+        "url": "https://your-deployed-app-url.com",
+        "description": "Deployed production server."
+      }
+    ],
+    "paths": {
+      "/contacts": {
+        "get": {
+          "tags": ["Contacts"],
+          "summary": "Get all contacts",
+          "operationId": "getAllContacts",
+          "responses": {
+            "200": {
+              "description": "Successful response"
+            }
+          }
+        },
+        "post": {
+          "tags": ["Contacts"],
+          "summary": "Create a new contact",
+          "operationId": "createContact",
+          "responses": {
+            "200": {
+              "description": "Successful creation"
+            },
+            "400": {
+              "description": "Invalid input"
+            }
+          }
+        }
+      },
+      "/contacts/{contactId}": {
+        "get": {
+          "tags": ["Contacts"],
+          "summary": "Get a contact by ID",
+          "operationId": "getContactById",
+          "parameters": [
+            {
+              "name": "contactId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "ID of the contact to get"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response"
+            },
+            "404": {
+              "description": "Contact not found"
+            }
+          }
+        },
+        "patch": {
+          "tags": ["Contacts"],
+          "summary": "Update a contact by ID",
+          "operationId": "updateContactById",
+          "parameters": [
+            {
+              "name": "contactId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "ID of the contact to update"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful update"
+            },
+            "400": {
+              "description": "Invalid input"
+            },
+            "404": {
+              "description": "Contact not found"
+            }
+          }
+        },
+        "delete": {
+          "tags": ["Contacts"],
+          "summary": "Delete a contact by ID",
+          "operationId": "deleteContactById",
+          "parameters": [
+            {
+              "name": "contactId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "ID of the contact to delete"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful deletion"
+            },
+            "404": {
+              "description": "Contact not found"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer"
+        }
+      }
+    }
+  }
+  

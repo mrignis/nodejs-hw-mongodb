@@ -1,6 +1,6 @@
 // c:/Users/admin/Documents/GitHub/nodejs-hw-mongodb/src/db/initMongoConnection.js
 import mongoose from 'mongoose';
-import { env } from '../db/env.js';
+import { env } from '../utils/env.js';
 
 export const initMongoConnection = async () => {
   try {

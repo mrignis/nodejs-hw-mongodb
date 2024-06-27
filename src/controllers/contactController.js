@@ -6,68 +6,77 @@ import {
   createContactService,
   upsertContactService,
   deleteContactService,
- 
 } from '../services/contact.js';
-
+import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { saveFile } from '../utils/saveFile.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
 export const getAllContactsService = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
- // Отримуємо фільтри з запиту
 
- const filter = {
-  name: req.query.name,
-  email: req.query.email,
-  isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
-};
-  const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter  });
-
-  res.json({
-    status: 200,
-    message: 'Successfully found contacts!',
-    data: contacts,
-  });
-};
-
-export const getContactById = async (req, res) => {
-  const { contactId } = req.params;
-
-  if (!isValidObjectId(contactId)) {
-    return res.status(400).json({
-      status: 400,
-      message: 'Invalid contact ID format',
-    });
-  }
+  // Отримуємо фільтри з запиту
+  const filter = {
+    name: req.query.name,
+    email: req.query.email,
+    isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
+    userId: req.user._id,  // Додаємо userId
+  };
 
   try {
-    const contact = await getContactByIdService(contactId);
-    if (!contact) {
-      return res.status(404).json({
-        status: 404,
-        message: `Contact with id ${contactId} not found`,
-      });
-    }
-    res.status(200).json({
+    const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter });
+
+    res.json({
       status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
-      data: contact,
+      message: 'Successfully found contacts!',
+      data: contacts,
     });
   } catch (error) {
     res.status(500).json({
       status: 500,
-      message: `Failed to retrieve contact with id ${contactId}`,
+      message: 'Internal server error',
       error: error.message,
     });
   }
 };
 
+export const getContactById = async (req, res, next) => {
+  const { contactId } = req.params;
+  const userId = req.user._id;
+
+  const contact = await getContactByIdService(contactId, userId);
+
+  if (!contact) {
+    next(createHttpError(404, 'Contact not found'));
+    return;
+  }
+
+  res.status(200).json({
+    status: 200,
+    message: `Successfully found contact with id ${contactId}!`,
+    data: contact,
+  });
+};
+
 export const createContact = async (req, res, next) => {
   try {
-    const newContact = await createContactService(req.body);
+    if (!req.user || !req.user._id) {
+      throw new Error('User ID not found');
+    }
+
+    let photoUrl = req.body.photo;
+ 
+    if (req.file) {
+      photoUrl = await saveFile(req.file);
+    } // Отримання посилання на збережений файл
+    const newContact = await createContactService({
+      ...req.body,
+      userId: req.user._id,
+      photo: photoUrl,
+    });
 
     const payload = {
       status: 201,
@@ -80,6 +89,8 @@ export const createContact = async (req, res, next) => {
   }
 };
 
+
+
 export const updateContactController = async (req, res, next) => {
   const { body } = req;
   const { contactId } = req.params;
@@ -91,23 +102,32 @@ export const updateContactController = async (req, res, next) => {
     });
   }
 
+  let photoUrl = req.body.photo;
+ 
+  if (req.file) {
+    photoUrl = await saveFile(req.file);
+  } // Отримання посилання на збережений файл
+
   try {
-    const { isNew, contact } = await upsertContactService(contactId, body, {
-      upsert: true,
-    });
+    if (!req.user || !req.user._id) {
+      throw new Error('User ID not found');
+    }
 
-    const status = isNew ? 201 : 200;
 
-    res.status(status).json({
-      status,
+    const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
+
+    res.status(200).json({
+      status: 200,
       message: `Successfully upserted contact!`,
-      data: contact,
+      data: {
+        ...contact,
+        lastErrorObject: undefined // Виключити lastErrorObject з відповіді
+      },
     });
   } catch (error) {
     next(error);
   }
 };
-
 export const patchContactController = async (req, res, next) => {
   const { body } = req;
   const { contactId } = req.params;
@@ -119,8 +139,18 @@ export const patchContactController = async (req, res, next) => {
     });
   }
 
+  let photoUrl = req.body.photo;
+ 
+  if (req.file) {
+    photoUrl = await saveFile(req.file);
+  } // Отримання посилання на збережений файл
+
   try {
-    const { contact } = await upsertContactService(contactId, body);
+    if (!req.user || !req.user._id) {
+      throw new Error('User ID not found');
+    }
+
+    const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
 
     res.status(200).json({
       status: 200,
@@ -143,7 +173,7 @@ export const deleteContact = async (req, res, next) => {
   }
 
   try {
-    const deletedContact = await deleteContactService(contactId);
+    const deletedContact = await deleteContactService(contactId, req.user._id);
     if (!deletedContact) {
       return res.status(404).json({
         status: 404,

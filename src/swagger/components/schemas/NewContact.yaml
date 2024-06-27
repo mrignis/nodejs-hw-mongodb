@@ -1,0 +1,18 @@
+type: object
+properties:
+  name:
+    type: string
+  phoneNumber:
+    type: string
+  email:
+    type: string
+  isFavourite:
+    type: boolean
+  contactType:
+    type: string
+  photo:
+    type: string
+required:
+  - name
+  - phoneNumber
+  - email
