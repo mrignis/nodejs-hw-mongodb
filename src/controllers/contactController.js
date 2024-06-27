@@ -104,15 +104,17 @@ export const updateContactController = async (req, res, next) => {
     });
   }
 
-  try {
-    let photoUrl = body.photo || null;
+  let photoUrl = req.body.photo;
+ 
+  if (req.file) {
+    photoUrl = await saveFile(req.file);
+  } // Отримання посилання на збережений файл
 
-    if (req.file) {
-      photoUrl = await uploadToCloudinary(req.file.path);
+  try {
+    if (!req.user || !req.user._id) {
+      throw new Error('User ID not found');
     }
-    if (req.file) {
-      photoUrl = await saveFileToLocalMachine(req.file.path);
-    }
+
 
     const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
 
@@ -139,11 +141,15 @@ export const patchContactController = async (req, res, next) => {
     });
   }
 
-  try {
-    let photoUrl = body.photo || null;
+  let photoUrl = req.body.photo;
+ 
+  if (req.file) {
+    photoUrl = await saveFile(req.file);
+  } // Отримання посилання на збережений файл
 
-    if (req.file) {
-      photoUrl = await uploadToCloudinary(req.file.path);
+  try {
+    if (!req.user || !req.user._id) {
+      throw new Error('User ID not found');
     }
 
     const { contact } = await upsertContactService(contactId, { ...body, photo: photoUrl }, req.user._id);
