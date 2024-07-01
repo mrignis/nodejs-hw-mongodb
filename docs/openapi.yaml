@@ -1,18 +1,20 @@
 openapi: 3.1.0
 info:
   version: 1.0.0
-  title: Назва вашого додатку
+  title: Node.js HW MongoDB API
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   description: >
-    Опис вашого додатку
+    API documentation for the Node.js HW MongoDB application.
 tags:
   - name: Contacts
-    description: Операції, пов'язані з контактами
+    description: Operations related to contacts.
 servers:
   - url: http://localhost:3000
+    description: Local development server.
   - url: https://nodejs-hw-mongodb-1.onrender.com/
+    description: Deployed production server.
 paths:
   /contacts/{contactId}:
     $ref: ../swagger/paths/contacts/{id}/get.yaml
