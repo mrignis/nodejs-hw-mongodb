@@ -12,7 +12,7 @@ tags:
     description: Операції, пов'язані з контактами
 servers:
   - url: http://localhost:3000
-  - url: https://your-deployed-site-url
+  - url: https://nodejs-hw-mongodb-1.onrender.com/
 paths:
   /contacts/{contactId}:
     $ref: ../swagger/paths/contacts/{id}/get.yaml
