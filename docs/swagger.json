@@ -17,11 +17,11 @@
   ],
   "servers": [
     {
-      "url": "https://nodejs-hw-mongodb-1.onrender.com",
+      "url": "https://nodejs-hw-mongodb-25ob.onrender.com",
       "description": "Local development server."
     },
     {
-      "url": "https://nodejs-hw-mongodb-1.onrender.com",
+      "url": "https://nodejs-hw-mongodb-25ob.onrender.com",
       "description": "Deployed production server."
     }
   ],
