@@ -5,15 +5,15 @@ operationId: createContact
 description: Create a new contact
 security:
   - bearerAuth: []
-requestBody:
-  required: true
+equestBody:
   content:
-    application/json:
+    multipart/form-data:
       schema:
         type: object
         required:
           - name
           - phoneNumber
+          - email
         properties:
           name:
             description: "Contact's name"
@@ -47,7 +47,7 @@ responses:
               example: 'Contact successfully created!'
             data:
               type: object
-              $ref: '#/components/schemas/Contact'
+              $ref: '#/components/schemas/NewContact.yaml'
   '400':
     description: Validation error
     content:
