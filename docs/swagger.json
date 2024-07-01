@@ -40,20 +40,44 @@
           }
         }
       },
-      "post": {
-        "tags": ["Contacts"],
-        "summary": "Create a new contact",
-        "operationId": "createContact",
-        "responses": {
-          "200": {
-            "description": "Successful creation"
+      {
+        "post": {
+          "tags": ["Contacts"],
+          "summary": "Create a new contact",
+          "operationId": "createContact",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "phoneNumber": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["name", "phoneNumber", "email"]
+                }
+              }
+            }
           },
-          "400": {
-            "description": "Invalid input"
+          "responses": {
+            "200": {
+              "description": "Successful creation"
+            },
+            "400": {
+              "description": "Invalid input"
+            }
           }
         }
       }
-    },
+      ,
     "/contacts/{contactId}": {
       "get": {
         "tags": ["Contacts"],
