@@ -116,7 +116,7 @@
       }
     },
     "/contacts/{contactId}": {
-      "get": {
+      "put": {
         "tags": ["Contacts"],
         "summary": "Get a contact by ID",
         "operationId": "getContactById",
@@ -158,37 +158,6 @@
             "description": "ID of the contact to update"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "phoneNumber": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "isFavourite": {
-                    "type": "boolean"
-                  },
-                  "contactType": {
-                    "type": "string",
-                    "enum": ["personal", "work", "home"]
-                  },
-                  "photo": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful update"
