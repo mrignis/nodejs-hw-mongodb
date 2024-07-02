@@ -40,44 +40,81 @@
           }
         }
       },
-      {
-        "post": {
-          "tags": ["Contacts"],
-          "summary": "Create a new contact",
-          "operationId": "createContact",
-          "requestBody": {
-            "required": true,
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Create a new contact",
+        "operationId": "createContact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "phoneNumber",
+                  "email"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "phoneNumber": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "isFavourite": {
+                    "type": "boolean"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": ["personal", "work", "home"]
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Creates a contact",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
                   "properties": {
-                    "name": {
-                      "type": "string"
+                    "status": {
+                      "type": "integer",
+                      "example": 201
                     },
-                    "phoneNumber": {
-                      "type": "string"
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully created a contact!"
                     },
-                    "email": {
-                      "type": "string"
+                    "data": {
+                      "$ref": "#/components/schemas/contact"
                     }
-                  },
-                  "required": ["name", "phoneNumber", "email"]
+                  }
                 }
               }
             }
           },
-          "responses": {
-            "200": {
-              "description": "Successful creation"
-            },
-            "400": {
-              "description": "Invalid input"
-            }
+          "404": {
+            "$ref": "#/components/responses/404"
           }
         }
       }
-      ,
+    },
     "/contacts/{contactId}": {
       "get": {
         "tags": ["Contacts"],
@@ -167,6 +204,66 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "contact": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "65e4decdd286b30065d54af9",
+            "description": "Contact's id"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "Contact's name"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "555-44-33",
+            "description": "Contact's phone number"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@gmail.com",
+            "description": "Contact's email"
+          },
+          "isFavourite": {
+            "type": "boolean",
+            "example": false,
+            "description": "Mark on a favorite contact"
+          },
+          "contactType": {
+            "type": "string",
+            "enum": ["personal", "work", "home"],
+            "example": "personal",
+            "description": "Contact's type. Default value -'personal'"
+          },
+          "userId": {
+            "type": "string",
+            "example": "65e4decdd286b30065d54af9",
+            "description": "Contact's user id"
+          },
+          "photo": {
+            "type": "string",
+            "format": "binary",
+            "description": "Contact's photo"
+          }
+        },
+        "required": [
+          "_id",
+          "name",
+          "phoneNumber",
+          "contactType",
+          "userId"
+        ]
+      }
+    },
+    "responses": {
+      "404": {
+        "description": "Not Found"
       }
     }
   },
