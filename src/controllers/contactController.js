@@ -15,33 +15,19 @@ import { saveFile } from '../utils/saveFile.js';
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
 
 export const getAllContactsService = async (req, res) => {
-  const { page, perPage } = parsePaginationParams(req.query);
-  const { sortBy, sortOrder } = parseSortParams(req.query);
 
-  // Отримуємо фільтри з запиту
-  const filter = {
-    name: req.query.name,
-    email: req.query.email,
-    isFavourite: req.query.isFavourite !== undefined ? req.query.isFavourite === 'true' : undefined,
-    userId: req.user._id,  // Додаємо userId
-  };
 
-  try {
-    const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter });
+    const {page, perPage} = parsePaginationParams(req.query);
+    const { sortBy, sortOrder } = parseSortParams(req.query);    
 
-    res.json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: contacts,
+    const contactsfound = await getAllContacts({page,perPage,sortBy,sortOrder,userId: req.user._id,});
+    res.status(200).json({
+        status: 200,
+        message: 'Successfully found contacts!',
+        data: contactsfound,
     });
-  } catch (error) {
-    res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      error: error.message,
-    });
-  }
 };
+
 
 export const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
