@@ -52,7 +52,7 @@
                 "required": [
                   "name",
                   "phoneNumber",
-                  "email"
+                  
                 ],
                 "properties": {
                   "name": {
