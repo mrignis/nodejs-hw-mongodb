@@ -16,4 +16,4 @@ properties:
 required:
   - name
   - phoneNumber
-  - email
+  
