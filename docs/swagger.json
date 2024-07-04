@@ -39,7 +39,7 @@
             "description": "Bad Request"
           }
         }
-      },        },"/contacts/{contactId}": {
+      }, "/contacts/{contactId}": {
         "get": {
           "tags": ["Contacts"],
           "summary": "Get a contact by ID",
