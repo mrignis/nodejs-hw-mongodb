@@ -18,10 +18,6 @@
   "servers": [
     {
       "url": "https://nodejs-hw-mongodb-25ob.onrender.com",
-      "description": "Local development server."
-    },
-    {
-      "url": "https://nodejs-hw-mongodb-25ob.onrender.com",
       "description": "Deployed production server."
     }
   ],
@@ -33,37 +29,33 @@
         "operationId": "getAllContacts",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully found contacts!"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/contact"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
           }
         }
-      }, "/contacts/{contactId}": {
-        "get": {
-          "tags": ["Contacts"],
-          "summary": "Get a contact by ID",
-          "operationId": "getContactId",
-          "parameters": [
-            {
-              "name": "contactId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type": "string"
-              },
-              "description": "ID of the contact to get"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Successful response"
-            },
-            "404": {
-              "description": "Contact not found"
-            }
-          }
-        },
+      },
       "post": {
         "tags": ["Contacts"],
         "summary": "Create a new contact",
@@ -73,11 +65,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name",
-                  "phoneNumber",
-                  
-                ],
+                "required": ["name", "phoneNumber"],
                 "properties": {
                   "name": {
                     "type": "string"
@@ -111,11 +99,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "status",
-                    "message",
-                    "data"
-                  ],
+                  "required": ["status", "message", "data"],
                   "properties": {
                     "status": {
                       "type": "integer",
@@ -140,6 +124,37 @@
       }
     },
     "/contacts/{contactId}": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "Get a contact by ID",
+        "operationId": "getContactId",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the contact to get"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/contact"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      },
       "put": {
         "tags": ["Contacts"],
         "summary": "Update a contact by ID",
@@ -194,7 +209,7 @@
             "description": "Invalid input"
           },
           "404": {
-            "description": "Contact not found"
+            "$ref": "#/components/responses/404"
           }
         }
       },
@@ -252,7 +267,7 @@
             "description": "Invalid input"
           },
           "404": {
-            "description": "Contact not found"
+            "$ref": "#/components/responses/404"
           }
         }
       },
@@ -279,7 +294,7 @@
             "description": "Bad Request"
           },
           "404": {
-            "description": "Contact not found"
+            "$ref": "#/components/responses/404"
           }
         }
       }
@@ -338,24 +353,4 @@
             "description": "Contact's photo"
           }
         },
-        "required": [
-          "_id",
-          "name",
-          "phoneNumber",
-          "contactType",
-          "userId"
-        ]
-      }
-    },
-    "responses": {
-      "404": {
-        "description": "Not Found"
-      }
-    }
-  },
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ]
-}
+        "required": ["_id", "name", "phoneNumber", "contactType
