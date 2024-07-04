@@ -44,7 +44,10 @@
                       "example": "Successfully found contacts!"
                     },
                     "data": {
-                      "$ref": "#/components/schemas/contact"
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/contact"
+                      }
                     }
                   }
                 }
@@ -353,4 +356,4 @@
             "description": "Contact's photo"
           }
         },
-        "required": ["_id", "name", "phoneNumber", "contactType
+        "required": ["_id", "name", "phoneNumber", "contactType", "userId"]
