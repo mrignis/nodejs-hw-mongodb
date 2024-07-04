@@ -39,7 +39,31 @@
             "description": "Bad Request"
           }
         }
-      },
+      },        },"/contacts/{contactId}": {
+        "get": {
+          "tags": ["Contacts"],
+          "summary": "Get a contact by ID",
+          "operationId": "getContactId",
+          "parameters": [
+            {
+              "name": "contactId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "ID of the contact to get"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response"
+            },
+            "404": {
+              "description": "Contact not found"
+            }
+          }
+        },
       "post": {
         "tags": ["Contacts"],
         "summary": "Create a new contact",
