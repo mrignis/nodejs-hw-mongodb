@@ -39,141 +39,40 @@
             "description": "Bad Request"
           }
         }
-      },
-      "post": {
+      }
+    },
+    "/contacts/{contactId}": {
+      "get": {
         "tags": ["Contacts"],
-        "summary": "Create a new contact",
-        "operationId": "createContact",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "phoneNumber",
-
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "phoneNumber": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "isFavourite": {
-                    "type": "boolean"
-                  },
-                  "contactType": {
-                    "type": "string",
-                    "enum": ["personal", "work", "home"]
-                  },
-                  "photo": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
+        "summary": "Get a contact by ID",
+        "operationId": "getContactId",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the contact to get"
           }
-        },
+        ],
         "responses": {
-          "201": {
-            "description": "Creates a contact",
+          "200": {
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "status",
-                    "message",
-                    "data"
-                  ],
-                  "properties": {
-                    "status": {
-                      "type": "integer",
-                      "example": 201
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Successfully created a contact!"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/contact"
-                    }
-                  }
+                  "$ref": "#/components/schemas/contact"
                 }
               }
             }
           },
           "404": {
-            "$ref": "#/components/responses/404"
-          }
-        }
-      }
-    },    "/contacts/{id}": {
-      "get": {
-        "tags": [
-          "Contacts"
-        ],
-        "summary": "Get contacts by id",
-        "operationId": "getContactsById",
-        "description": "You can get access only to children added by you",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "65ca67e7ae7f10c88b598384"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful contact retrieval",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "status",
-                    "message",
-                    "data"
-                  ],
-                  "properties": {
-                    "status": {
-                      "type": "integer",
-                      "example": 200
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Successfully found contact with id 65ca67e7ae7f10c88b598384!"
-                    },
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/contacts"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
+            "description": "Contact not found"
           }
         }
       },
-    "/contacts/{contactId}": {
       "put": {
         "tags": ["Contacts"],
         "summary": "Update a contact by ID",
@@ -392,4 +291,4 @@
       "bearerAuth": []
     }
   ]
-} 
+}
