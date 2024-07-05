@@ -39,8 +39,7 @@
             "description": "Bad Request"
           }
         }
-      }, 
-              
+      },
       "post": {
         "tags": ["Contacts"],
         "summary": "Create a new contact",
